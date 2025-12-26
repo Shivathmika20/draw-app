@@ -14,12 +14,12 @@
     "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
     "@repo/backend-auth": "workspace:*",
     "@repo/common-types": "workspace:*",
-    "@repo/db": "workspace:*"
+    "@repo/db": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10"
   },
   "keywords": [],
   "author": "",

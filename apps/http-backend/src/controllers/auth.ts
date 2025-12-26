@@ -10,23 +10,27 @@ export const signup = async (req: Request, res: Response) => {
     if(!parsedData.success){
         return res.status(400).json({message:'Invalid data'});
     }
-//db call
-    await prisma.user.create({
-        data:{
-            username:parsedData.data.username,
-            password:parsedData.data.password,
-            name:parsedData.data.name,
-            
-        }
-    })
-
-    res.json({message:'User created successfully'});
+    console.log(parsedData.data);
+    try{
+        await prisma.user.create({
+            data:{
+                username:parsedData.data.username,
+                password:parsedData.data.password,
+                name:parsedData.data.name,
+                
+            }
+        })
+        res.json({message:'User created successfully'});
+    }
+    catch(e){
+        return res.status(401).json({message:'User already exists'});
+    }
 }
 
 export const signin = async (req: Request, res: Response) => {
     
-    const data=SigninSchema.safeParse(req.body);
-    if(!data.success){
+    const parsedData=SigninSchema.safeParse(req.body);
+    if(!parsedData.success){
         return res.status(400).json({message:'Invalid data'});
     }
     const userId=1
