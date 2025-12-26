@@ -18,7 +18,8 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@repo/backend-auth": "workspace:*",
-    "@repo/common-types": "workspace:*"
+    "@repo/common-types": "workspace:*",
+    "@repo/db": "workspace:*"
   },
   "keywords": [],
   "author": "",

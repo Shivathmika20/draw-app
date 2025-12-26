@@ -1,6 +1,5 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated"
+  provider = "prisma-client-js"
 }
 
 
@@ -14,7 +13,7 @@ model User {
   username  String   @unique 
   password  String
   name      String
-  avatar    String
+  photo    String?
   rooms     Room[]
   chats     Chat[]
   createdAt DateTime @default(now()) 
