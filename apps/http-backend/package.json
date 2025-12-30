@@ -9,17 +9,19 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@repo/db": "workspace:*",
     "@types/node": "^22.15.3",
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "tsx": "^4.21.0",
-    "@repo/db": "workspace:*"
+    "tsx": "^4.21.0"
   },
   "devDependencies": {
     "@repo/backend-auth": "workspace:*",
     "@repo/common-types": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10"
   },

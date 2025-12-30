@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '@repo/backend-auth/config';
 import { SignupSchema,SigninSchema } from '@repo/common-types/types';
 import { prisma } from '@repo/db';
+import bcrypt from 'bcrypt';
 
 
 export const signup = async (req: Request, res: Response) => {
@@ -12,19 +13,29 @@ export const signup = async (req: Request, res: Response) => {
     }
     console.log(parsedData.data);
     try{
+        const existingUser=await prisma.user.findFirst({
+            where:{
+                username:parsedData.data.username,
+            }
+            
+        })
+        if(existingUser){
+            return res.status(401).json({message:'User already exists'});
+        }
+
+        const hashedPassword=await bcrypt.hash(parsedData.data.password,10);
         const userInfo=await prisma.user.create({
             data:{
                 username:parsedData.data.username,
-                password:parsedData.data.password,
+                password:hashedPassword,
                 name:parsedData.data.name,
-                
+                photo:parsedData.data.photo,
             }
         })
-        console.log(userInfo);
-        res.json({message:'User created successfully',userInfo});
+        return res.json({message:'User signed up successfully',userId:userInfo.id});
     }
     catch(e){
-        return res.status(401).json({message:'User already exists',error:e});
+        return res.status(401).json({message:'failed to signup',error:e});
     }
 }
 
@@ -34,9 +45,34 @@ export const signin = async (req: Request, res: Response) => {
     if(!parsedData.success){
         return res.status(400).json({message:'Invalid data'});
     }
-    const userId=1
-    const token=jwt.sign({userId},JWT_SECRET,{expiresIn:'1h'});
+    try{
+        const user=await prisma.user.findFirst({
+            where:{
+                username:parsedData.data.username,
+            }
+        })
 
-    res.json({token,message:'Login successful'});
+        if(!user){
+            return res.status(401).json({message:'User doesnt exist please signup'});
+        }
+    
+        const isPasswordValid=await bcrypt.compare(parsedData.data.password,user?.password);
+        if(isPasswordValid){
+            if(!JWT_SECRET){
+                return res.status(401).json({message:'JWT_SECRET is not set'});
+            }
+            const token=jwt.sign({userId:user.id},JWT_SECRET,{expiresIn:'1h'});
+            return res.status(200).json({token,message:'Login successful'});
+        }
+        else{
+            return res.status(401).json({message:'Invalid password'});
+        }
+   
+        
+    }catch(e){
+        return res.status(401).json({message:'Failed to login',error:e});
+    }
+    
+
 
 }
