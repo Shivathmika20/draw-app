@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '@repo/backend-auth/config';
 import { SignupSchema,SigninSchema } from '@repo/common-types/types';
-import { prisma } from '@repo/db/client';
+import { prisma } from '@repo/db';
 
 
 export const signup = async (req: Request, res: Response) => {
@@ -12,7 +12,7 @@ export const signup = async (req: Request, res: Response) => {
     }
     console.log(parsedData.data);
     try{
-        await prisma.user.create({
+        const userInfo=await prisma.user.create({
             data:{
                 username:parsedData.data.username,
                 password:parsedData.data.password,
@@ -20,10 +20,11 @@ export const signup = async (req: Request, res: Response) => {
                 
             }
         })
-        res.json({message:'User created successfully'});
+        console.log(userInfo);
+        res.json({message:'User created successfully',userInfo});
     }
     catch(e){
-        return res.status(401).json({message:'User already exists'});
+        return res.status(401).json({message:'User already exists',error:e});
     }
 }
 
