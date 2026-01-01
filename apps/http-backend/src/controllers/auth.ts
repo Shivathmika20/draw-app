@@ -32,7 +32,7 @@ export const signup = async (req: Request, res: Response) => {
                 photo:parsedData.data.photo,
             }
         })
-        return res.json({message:'User signed up successfully',userId:userInfo.id});
+        return res.status(200).json({message:'User signed up successfully',userId:userInfo.id});
     }
     catch(e){
         return res.status(401).json({message:'failed to signup',error:e});
@@ -73,6 +73,4 @@ export const signin = async (req: Request, res: Response) => {
         return res.status(401).json({message:'Failed to login',error:e});
     }
     
-
-
 }

@@ -4,4 +4,4 @@ import { createRoom } from '../controllers/room';
 
 export const roomRouter:Router = Router();
 
-roomRouter.post('/create',authenticate,createRoom);
+roomRouter.post('/',authenticate,createRoom);
