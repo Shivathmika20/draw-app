@@ -22,8 +22,10 @@ model Room {
   slug      String   @unique
   createdAt DateTime @default(now())
   adminId   Int
+  admin     User     @relation("AdminRooms", fields: [adminId], references: [id])
   Chat      Chat[]
-  User      User     @relation(fields: [adminId], references: [id])
+  members   User[]   @relation("RoomMembers")
+
 }
 
 model User {
@@ -34,5 +36,6 @@ model User {
   createdAt DateTime @default(now())
   photo     String?
   Chat      Chat[]
-  Room      Room[]
+  rooms      Room[]   @relation("AdminRooms")
+  memberRooms     Room[]   @relation("RoomMembers")
 }

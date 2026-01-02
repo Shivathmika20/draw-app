@@ -100,9 +100,18 @@ importers:
 
   apps/ws-backend:
     dependencies:
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
       ws:
         specifier: ^8.18.3
         version: 8.18.3
