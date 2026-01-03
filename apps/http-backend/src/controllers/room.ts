@@ -22,3 +22,43 @@ export const createRoom = async (req: Request, res: Response) => {
   }
 }
 
+export const getRoom=async(req:Request,res:Response)=>{
+ const{ roomSlug}=req.params
+
+ const room=await prisma.room.findFirst({
+   where:{
+      slug:roomSlug
+   },
+   include: {
+      members: { select: { id: true, name: true } },
+      admin: { select: { id: true, name: true } }
+    }
+ })
+ if(!room){
+  return res.status(404).json({message:'Room not found'});
+ }
+ res.json({room});
+}
+
+
+export const getChats=async (req:Request,res:Response)=>{
+   const { slug } = req.params;
+   const room = await prisma.room.findUnique({
+      where: { slug },
+    });
+   if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    const chats = await prisma.chat.findMany({
+      where: { roomId: room.id },
+      orderBy: { createdAt: "desc" },
+      take: 200 // limit
+    });
+    if(!chats){
+      return res.status(404).json({ message: "Chats not found" });
+    }
+    res.status(200).json({chats});
+
+}
+
