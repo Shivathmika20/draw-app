@@ -23,10 +23,11 @@ interface AuthProps{
   fields:AuthFileds[];
   submitLabel:string;
   mode:'signin' | 'signup';
+  onSubmit:(values:any)=>Promise<void>;
 }
 
 
-export const Authform = ({title,fields,submitLabel,mode}:AuthProps) => {
+export const Authform = ({title,fields,submitLabel,mode,onSubmit}:AuthProps) => {
   const schema=mode==='signup'?SignupSchema:SigninSchema;
 
   const form =useForm<z.infer<typeof schema>>({
@@ -79,9 +80,6 @@ export const Authform = ({title,fields,submitLabel,mode}:AuthProps) => {
   }
   }
 
-  const onSubmit=async(data:z.infer<typeof schema>)=>{
-    console.log(data);
-  }
 
   return(
     <div className="flex justify-center items-center h-screen ">
