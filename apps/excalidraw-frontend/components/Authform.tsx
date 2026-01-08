@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@repo/ui/components/ui/button'
 import { Input } from '@repo/ui/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@repo/ui/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/components/ui/card'
 import { Form, FormControl,  FormField, FormItem, FormLabel, FormMessage } from '@repo/ui/components/ui/form'
 
 interface AuthFileds{
@@ -31,7 +31,53 @@ export const Authform = ({title,fields,submitLabel,mode}:AuthProps) => {
 
   const form =useForm<z.infer<typeof schema>>({
     resolver:zodResolver(schema as any),
+    defaultValues: (mode === 'signup' 
+      ? {
+          username: '',
+          password: '',
+          name: '',
+          photo: undefined,
+        }
+      : {
+          username: '',
+          password: '',
+        }) as z.infer<typeof schema>
   })
+
+  const handleFileUpload=async (e:React.ChangeEvent<HTMLInputElement>)=>{
+    const file = e.target.files?.[0]
+    if (!file) return
+
+  try {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append(
+      'upload_preset',
+      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
+    )
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    )
+    if (!res.ok) {
+      throw new Error('Cloudinary upload failed')
+    }
+
+    const data = await res.json()
+    console.log("cloudinary url",data.secure_url);
+
+    // 🔑 Store URL string in RHF (this matches Zod schema)
+    form.setValue('photo' as keyof z.infer<typeof schema>, data.secure_url, {
+      shouldValidate: true,
+      shouldDirty: true,
+    })
+  } catch (error) {
+    console.error('Image upload error:', error)
+  }
+  }
 
   const onSubmit=async(data:z.infer<typeof schema>)=>{
     console.log(data);
@@ -55,13 +101,22 @@ export const Authform = ({title,fields,submitLabel,mode}:AuthProps) => {
                   <FormItem>
                     <FormLabel className="text-md font-medium">{f.label}</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder={f.placeholder || ''}
-                        type={f.type || 'text'}
-                        required={f.required}
-                        {...field}
-                        className='rounded-md  text-foreground focus:border-primary focus:ring-primary px-2'
-                      />
+                    {f.name === 'photo' ? (
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileUpload}
+                          className='rounded-md text-foreground focus:border-primary focus:ring-primary px-2'
+                        />
+                      ) : (
+                        <Input
+                          placeholder={f.placeholder || ''}
+                          type={f.type || 'text'}
+                          required={f.required}
+                          {...field}
+                          className='rounded-md text-foreground focus:border-primary focus:ring-primary px-2'
+                        />
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>

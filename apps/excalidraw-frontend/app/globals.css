@@ -66,9 +66,9 @@
 }
 
 @layer base {
-  body {
+body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: Arial, Helvetica, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   }
 }
