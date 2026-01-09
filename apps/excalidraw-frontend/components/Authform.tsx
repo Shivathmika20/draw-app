@@ -4,10 +4,14 @@ import {SigninSchema,SignupSchema} from '@repo/common-types/types'
 import {zodResolver} from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { useRouter } from 'next/navigation'
 import { Button } from '@repo/ui/components/ui/button'
 import { Input } from '@repo/ui/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/components/ui/card'
 import { Form, FormControl,  FormField, FormItem, FormLabel, FormMessage } from '@repo/ui/components/ui/form'
+import { SignupAction,SigninAction } from '@/actions/auth-server-action'
+
+
 
 interface AuthFileds{
   name:string;
@@ -23,11 +27,11 @@ interface AuthProps{
   fields:AuthFileds[];
   submitLabel:string;
   mode:'signin' | 'signup';
-  onSubmit:(values:any)=>Promise<void>;
+
 }
 
 
-export const Authform = ({title,fields,submitLabel,mode,onSubmit}:AuthProps) => {
+export const Authform = ({title,fields,submitLabel,mode}:AuthProps) => {
   const schema=mode==='signup'?SignupSchema:SigninSchema;
 
   const form =useForm<z.infer<typeof schema>>({
@@ -78,6 +82,22 @@ export const Authform = ({title,fields,submitLabel,mode,onSubmit}:AuthProps) => 
   } catch (error) {
     console.error('Image upload error:', error)
   }
+  }
+  const router=useRouter();
+  const onSubmit = async (values: z.infer<typeof schema>) => {
+    console.log(values)
+
+    const res=
+        mode==='signup'? await SignupAction(values as z.infer<typeof SignupSchema>)
+        :await SigninAction(values as z.infer<typeof SigninSchema>);
+    console.log(res);
+    if(!res.success){
+      console.error(res.message);
+      return;
+    }
+    form.reset();
+    router.push(mode==='signup'?'/signin':'/');
+    
   }
 
 

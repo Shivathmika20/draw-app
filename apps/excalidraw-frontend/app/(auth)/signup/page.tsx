@@ -6,18 +6,7 @@ import { z } from "zod";
 
 export default function SignupPage() {
   
-  const handleSignup=async (values:z.infer<typeof SignupSchema>):Promise<void>=>{
-    try{
-      const res=await SignupAction(values);
-      if(!res){
-        console.error("Failed to signup");
-        return
-      }
-      redirect("/signin");
-    }catch(e){
-      console.log(e);
-    }
-  }
+
   return (
     <Authform
       title="Signup"
@@ -29,7 +18,6 @@ export default function SignupPage() {
       ]}
       submitLabel="Signup"
       mode="signup"
-      onSubmit={handleSignup}
     />
   )
 }
