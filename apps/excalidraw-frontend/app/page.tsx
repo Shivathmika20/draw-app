@@ -1,9 +1,21 @@
+import { Header } from "@/components/Header";
+import { Hero } from "@/components/Hero";
+import { Features } from "@/components/Features";
+import { Working } from "@/components/Working-flow";
+import { Footer } from "@/components/Footer";
+
+
+
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 text-white dark:bg-black sm:items-start">
-        Excalidraw landing page
-      </main>
-    </div>
+    <div className="min-h-screen bg-background">
+    <Header />
+    <main>
+      <Hero />
+      <Features />
+      <Working />
+    </main>
+    <Footer />
+  </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
 import { Toaster } from "@repo/ui/components/ui/sonner";
 
 const geistSans = Geist({
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Draw App",
-  description: "An Excalidraw clone",
+  title: "Sketch - Create & Join Drawing Rooms",
+  description: "An Excalidraw clone-A virtual whiteboard app where you can create or join drawing rooms. Sign up to start sketching diagrams, flowcharts, and more.",
 };
 
 export default function RootLayout({

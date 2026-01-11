@@ -145,7 +145,7 @@ export const Authform = ({title,fields,submitLabel,mode}:AuthProps) => {
                 )}
               /> 
             ))}
-            <Button type="submit"  className='w-full px-4 py-2 bg-blue-600 rounded-md hover:cursor-pointer'>
+            <Button type="submit"  className='w-full px-4 py-2 bg-accent text-accent-foreground rounded-md hover:cursor-pointer'>
               {submitLabel}
             </Button>
           </form>
