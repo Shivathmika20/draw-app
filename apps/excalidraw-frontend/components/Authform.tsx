@@ -10,7 +10,7 @@ import { Input } from '@repo/ui/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui/components/ui/card'
 import { Form, FormControl,  FormField, FormItem, FormLabel, FormMessage } from '@repo/ui/components/ui/form'
 import { SignupAction,SigninAction } from '@/actions/auth-server-action'
-
+import { toast } from 'sonner'
 
 
 interface AuthFileds{
@@ -83,6 +83,8 @@ export const Authform = ({title,fields,submitLabel,mode}:AuthProps) => {
     console.error('Image upload error:', error)
   }
   }
+
+
   const router=useRouter();
   const onSubmit = async (values: z.infer<typeof schema>) => {
     console.log(values)
@@ -93,9 +95,11 @@ export const Authform = ({title,fields,submitLabel,mode}:AuthProps) => {
     console.log(res);
     if(!res.success){
       console.error(res.message);
+      toast.error(res.message);
       return;
     }
     form.reset();
+    toast.success(res.message);
     router.push(mode==='signup'?'/signin':'/');
     
   }
@@ -141,7 +145,7 @@ export const Authform = ({title,fields,submitLabel,mode}:AuthProps) => {
                 )}
               /> 
             ))}
-            <Button type="submit"  className='w-full px-4 py-2 bg-blue-600 rounded-md'>
+            <Button type="submit"  className='w-full px-4 py-2 bg-blue-600 rounded-md hover:cursor-pointer'>
               {submitLabel}
             </Button>
           </form>
