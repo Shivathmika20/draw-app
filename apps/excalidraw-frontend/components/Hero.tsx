@@ -1,5 +1,11 @@
+
 import { Button } from "@repo/ui/components/ui/button"
-import { ArrowRight, Plus, LogIn } from "lucide-react"
+import { ArrowRight, LogIn } from "lucide-react"
+import { CreateDialog } from "../components/CreateDialog"
+
+
+
+
 
 export function Hero() {
   return (
@@ -12,6 +18,7 @@ export function Hero() {
           </span>
           Create or join drawing rooms
           <ArrowRight className="h-3 w-3" />
+        </div>
         </div>
 
         <h1 className="text-balance text-5xl font-bold tracking-tight text-foreground md:text-7xl lg:text-8xl">
@@ -26,13 +33,8 @@ export function Hero() {
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Button
-            size="lg"
-            className="h-12 rounded-full bg-accent px-8 text-accent-foreground hover:bg-accent/80 shadow-lg shadow-accent/25"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Create Room
-          </Button>
+          
+          <CreateDialog />
           <Button
             size="lg"
             variant="outline"
@@ -43,8 +45,10 @@ export function Hero() {
           </Button>
         </div>
 
-        <p className="mt-6 text-sm text-muted-foreground">Sign up to create and save your drawing rooms.</p>
-      </div>
+        <p className="mt-6 text-sm text-muted-foreground">
+          Sign up to create and save your drawing rooms.
+        </p>
+      
     </section>
   )
 }
