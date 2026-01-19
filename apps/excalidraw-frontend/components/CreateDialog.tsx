@@ -13,16 +13,47 @@ import {
   DialogTrigger,
 } from '@repo/ui/components/ui/dialog'
 import { Plus } from 'lucide-react'
+import { CreateRoomAction } from '../actions/room-server-action'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 export function CreateDialog() {
   const [isOpen, setIsOpen] = useState(false)
   const [roomName, setRoomName] = useState('')
-
-  const handleCreate = () => {
+  const router=useRouter()
+  const handleCreate = async () => {
     if (roomName.trim()) {
-      console.log('Creating room:', roomName)
+      const res=await CreateRoomAction({roomName:roomName})
+      console.log(res)
+      if(!res.success){
+        if(res.status===401 ){
+          toast.error(`${res.message}:Please login to create a room`)
+          router.push('/signin')
+          return;
+        }
+        if(res.status===403){
+          toast.error(`${res.message}`)
+          return;
+        }
+        if(res.status===409){
+          toast.error(`${res.message}`)
+          return;
+        }
+        if(res.status===500){
+          toast.error(`${res.message}`)
+          return;
+        }
+        if(res.status===400){
+          toast.error(`${res.message}`)
+          return;
+        }
+        toast.error(`${res.message}`)
+        return;
+      }
+      toast.success(`${res.message},Room ID:${res.roomId}`)
       setRoomName('')
       setIsOpen(false)
+  
     }
   }
 

@@ -15,10 +15,10 @@ export const createRoom = async (req: Request, res: Response) => {
          adminId:userID
       }
    })
-   res.json({message:'Room created successfully',roomId:roomInfo.id});
+   res.json({message:'Room created successfully',roomId:roomInfo.slug});
   }
   catch(e){
-    return res.status(401).json({message:'Room already exists with this name'});
+    return res.status(409).json({message:'Room already exists with this name'});
   }
 }
 
