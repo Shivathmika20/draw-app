@@ -89,6 +89,7 @@ export function CreateDialog() {
               className="bg-background text-foreground placeholder:text-muted-foreground"
               autoFocus
             />
+            
           </div>
         </div>
         <DialogFooter>

@@ -11,7 +11,7 @@ export const CreateRoomAction=async(values:z.infer<typeof CreateRoomSchema>)=>{
         method:'POST',
         headers:{
             'Content-Type':'application/json',
-            'Authorization': token? `${token}`: ""
+            'Authorization': token? `Bearer ${token}`: ""
         },
         body:JSON.stringify(values),
       })

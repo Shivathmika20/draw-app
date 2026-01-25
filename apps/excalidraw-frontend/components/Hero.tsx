@@ -1,7 +1,6 @@
-
-import { Button } from "@repo/ui/components/ui/button"
-import { ArrowRight, LogIn } from "lucide-react"
+import { ArrowRight} from "lucide-react"
 import { CreateDialog } from "../components/CreateDialog"
+import { JoinDialog } from "../components/JoinDialog"
 
 
 
@@ -35,14 +34,7 @@ export function Hero() {
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           
           <CreateDialog />
-          <Button
-            size="lg"
-            variant="outline"
-            className="h-12 rounded-full px-8 border-border bg-secondary/50 text-foreground hover:bg-secondary hover:border-accent/50"
-          >
-            <LogIn className="mr-2 h-4 w-4" />
-            Join Room
-          </Button>
+          <JoinDialog />
         </div>
 
         <p className="mt-6 text-sm text-muted-foreground">
