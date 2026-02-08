@@ -1,20 +1,20 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 // ---- Message Types ----
 type JoinedRoomMessage = {
-  type: 'join-room'
+  type: 'joined room'
   roomId: string
 }
 
 type LeftRoomMessage = {
-  type: 'left-room'
+  type: 'left room'
   roomId: string
 }
 
 type ChatMessage = {
-  type: 'chat'
+  type: 'sendMessage'
   message: string
   roomId: string
   userId: string
@@ -31,14 +31,13 @@ export type SocketMessage =
   | ChatMessage
   | ErrorMessage
 
-// ---- Hook ----
-export const useSocket = (token: string | null) => {
+export const useSocket = () => {
   const socketRef = useRef<WebSocket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [lastMessage, setLastMessage] = useState<SocketMessage | null>(null)
 
-  useEffect(() => {
-    if (!token) return
+  const connect = (token: string) => {
+    if (socketRef.current) return // already connected
 
     const ws = new WebSocket(`ws://localhost:8080?token=${token}`)
     socketRef.current = ws
@@ -61,17 +60,13 @@ export const useSocket = (token: string | null) => {
     ws.onclose = () => {
       console.log('Disconnected from socket')
       setIsConnected(false)
+      socketRef.current = null
     }
 
     ws.onerror = (err) => {
       console.error('WS error', err)
     }
-
-    return () => {
-      ws.close()
-      socketRef.current = null
-    }
-  }, [token])
+  }
 
   const send = (data: object) => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
@@ -81,9 +76,17 @@ export const useSocket = (token: string | null) => {
     }
   }
 
+  const disconnect = () => {
+    socketRef.current?.close()
+    socketRef.current = null
+    setIsConnected(false)
+  }
+
   return {
     isConnected,
     lastMessage,
+    connect,
     send,
+    disconnect,
   }
 }
