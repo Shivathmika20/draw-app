@@ -14,8 +14,10 @@ export const SignupAction=async (values:z.infer<typeof SignupSchema>)=>{
         body:JSON.stringify(values),
       })
       const data=await res.json();
+      console.log(data)
      if(!res.ok){
         return { success: false, message: data.message }
+
      }
      return { success: true, message: data.message }
      

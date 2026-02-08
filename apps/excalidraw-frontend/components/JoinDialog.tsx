@@ -2,7 +2,7 @@
 import { Button } from '@repo/ui/components/ui/button'
 import { LogIn } from 'lucide-react'
 import { Input } from '@repo/ui/components/ui/input'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -12,34 +12,71 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@repo/ui/components/ui/dialog'
-import { cookies } from 'next/headers'
+// import { cookies } from 'next/headers'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useSocket } from '@/hooks/useSocket'
+import { getToken } from '@/actions/get-token-action'
+import type { SocketMessage } from '@/hooks/useSocket'
+
 
 
 export function JoinDialog() {
     const [isOpen, setIsOpen] = useState(false)
     const [roomId, setRoomId] = useState('')
+    const [token,setToken]=useState<string | null>(null)
+
     const router=useRouter()
+    
+
+    const {isConnected, lastMessage, send }=useSocket(token)
+
+    useEffect(() => {
+      if (!lastMessage) return
+      console.log('Got WS data in component:', lastMessage)
+
+      if (lastMessage.type === 'error') {
+        toast.error(lastMessage.message)
+      }
+
+      if (lastMessage.type === 'join-room') {
+
+        toast.success(`Joined room ${lastMessage.roomId}`)
+        console.log('Navigating to room:', lastMessage.roomId)
+        router.push(`/canvas/room/${lastMessage.roomId}`)
+      }
+    },[lastMessage,router]
+  )
+
     const handleUserJoin = async () => {
-      const cookieStore=await cookies()
-      const token=cookieStore.get('token')?.value
-      if(!token){
+     
+      const t=await getToken()
+      
+      if(!t){
         toast.error('Please login to join a room')
         router.push('/signin')
         return;
       }
-      const {ws,isConnected}=useSocket(token)
-      if(!isConnected){
-        toast.error('Failed to connect to socket')
-        return;
-      }
+      setToken(t)
+      setIsOpen(true) // open dialog only after token is set
+     
+     
       
     }
 
 
-    const handleJoin = async () => {}
+    const handleJoin = async () => {
+      if (!isConnected ) {
+        toast.error('Socket not connected yet')
+        return
+      }
+      if (!roomId.trim()) {
+        toast.error('Enter a room ID')
+        return
+      }
+      send({ type: 'join-room', roomId:roomId })
+      setIsOpen(false)
+    }
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen} >
         <DialogTrigger asChild>

@@ -198,4 +198,7 @@ wss.on('connection', (ws: WebSocket, req) => {
       console.log('Client disconnected');
       
     });
+    // ws.on('close', (code, reason) => {
+    //   console.log('Client disconnected. code=', code, 'reason=', reason.toString());
+    // });
 })

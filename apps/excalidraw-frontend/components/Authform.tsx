@@ -86,6 +86,7 @@ export const Authform = ({title,fields,submitLabel,mode}:AuthProps) => {
 
 
   const router=useRouter();
+  
   const onSubmit = async (values: z.infer<typeof schema>) => {
     console.log(values)
 
