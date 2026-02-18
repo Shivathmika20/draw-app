@@ -35,7 +35,7 @@ export const Authform = ({title,fields,submitLabel,mode}:AuthProps) => {
   const schema=mode==='signup'?SignupSchema:SigninSchema;
 
   const form =useForm<z.infer<typeof schema>>({
-    resolver:zodResolver(schema as any),
+    resolver:zodResolver(schema),
     defaultValues: (mode === 'signup' 
       ? {
           username: '',

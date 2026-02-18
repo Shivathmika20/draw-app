@@ -23,9 +23,11 @@ export const createRoom = async (req: Request, res: Response) => {
 }
 
 export const getRoom=async(req:Request,res:Response)=>{
+
  const{ roomSlug}=req.params
 
- const room=await prisma.room.findFirst({
+
+ const room=await prisma.room.findUnique({
    where:{
       slug:roomSlug
    },

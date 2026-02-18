@@ -4,7 +4,8 @@
   "description": "",
   "main": "./src/types.ts",
   "exports": {
-    "./types": "./src/types.ts"
+    "./types": "./src/types.ts",
+    "./roomtypes":"./src/roomtypes.ts"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
