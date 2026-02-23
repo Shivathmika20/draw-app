@@ -131,9 +131,11 @@ wss.on('connection', (ws: WebSocket, req) => {
         if(user){
           user.rooms=user?.rooms?.filter(room=>room!==roomId); //keep rooms that are not the roomId
         }
+        
         ws.send(JSON.stringify({ 
           type: 'left room', 
           roomId: roomId,
+          
         }));
       }
 

@@ -65,7 +65,7 @@ export function JoinDialog() {
 
   const handleJoin = async () => {
     if (!isConnected) {
-      toast.error('Socket not connected yet')
+      toast.error('Socket not connected retry login')
       return
     }
     if (!roomId.trim()) {
