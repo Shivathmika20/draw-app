@@ -58,14 +58,17 @@ export function JoinDialog() {
       return
     }
   
-    connect(t)     // 🔥 create WS connection here
+    if (!isConnected) {
+      connect(t)
+    }
+  
     setIsOpen(true)
   }
   
 
   const handleJoin = async () => {
     if (!isConnected) {
-      toast.error('Socket not connected retry login')
+      toast.loading("Connecting...")
       return
     }
     if (!roomId.trim()) {

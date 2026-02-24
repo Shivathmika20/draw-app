@@ -15,9 +15,10 @@ const ToolBar = ({ room }: ToolBarProps) => {
 
   const [open,setOpen]=useState(false)
   const router=useRouter()
-  const {  lastMessage, send} = useSocketContext()
+  const { onlineUsers,lastMessage,send } = useSocketContext()
 
   useEffect(() => {
+    
     if (!lastMessage) return
     console.log('Got WS data in component:', lastMessage)
 
@@ -28,15 +29,12 @@ const ToolBar = ({ room }: ToolBarProps) => {
     if (lastMessage.type === 'left room') {
 
       toast.success(`left room ${lastMessage.roomId}`)
-      console.log('Navigating to room:', lastMessage.roomId)
       router.push(`/`)
     }
-  },[lastMessage]
+  },[lastMessage,router]
 )
 
   const handleLeave=()=>{
-    
-
     send({
       type:"leave-room",
       roomId:room.slug
@@ -56,12 +54,12 @@ const ToolBar = ({ room }: ToolBarProps) => {
       {/* right */}
       <div className='flex gap-4 '>
        <div>
-        <Button className='relative rounded-full px-3 text-accent bg-transparent border border-accent  hover:bg-transparent hover:cursor-pointer'
+        <Button className='relative rounded-full px-3 text-accent bg-transparent border border-zinc-600 hover:bg-transparent hover:cursor-pointer'
           onClick={()=>(setOpen(prev => !prev))}
         >
             <UsersRound/>
         </Button>
-       </div>
+       </div> 
         <div>
         <Button className='hover:cursor-pointer' onClick={handleLeave}>Leave Room</Button>
         </div>
@@ -72,22 +70,38 @@ const ToolBar = ({ room }: ToolBarProps) => {
           <div className='absolute right-5 top-18 w-40 bg-zinc-900 border rounded-lg shadow-lg p-3 text-foreground'>
               <div className='space-y-2 '>
          
-                  {room.members && room.members.length > 0 ? (
-                    room.members.map((member: Member) => (
-                      <div key={member.id} className='flex items-center space-x-2'>
+              {room.members && room.members.length > 0 ? (
+              room.members.map((member: Member) => {
+
+                  const isOnline = onlineUsers.includes(member.id)
+                 
+                  return (
+                    <div key={member.id} className='flex items-center space-x-2'>
+                      
+                      <div className="relative">
                         <div className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-semibold">
-                          <span>{member.name?.[0]?.toUpperCase()}</span>
+                          {member.name?.[0]?.toUpperCase()}
                         </div>
-                        <div>
-                          <span>{member.name}</span>
-                        </div>
+
+                        {/* online indicator */}
+                        {isOnline ? (
+                               <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-black"/>
+                        ):(
+                          <span className="absolute bottom-0 right-0 w-2 h-2 bg-gray-500 rounded-full border border-black"/>
+                        )}
+                        
                       </div>
-                    ))
-                  ) : (
-                    <span className="text-xs text-gray-400 italic">
-                      No one joined yet
-                    </span>
-                  )}
+                      <span>{member.name}</span>
+                      
+
+                    </div>
+                  )
+                })
+              ) : (
+                <span className="text-xs text-gray-400 italic">
+                  No one joined yet
+                </span>
+              )}
             </div>
         </div>
       )}

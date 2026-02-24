@@ -13,6 +13,23 @@ type LeftRoomMessage = {
   roomId: string
 }
 
+type UserJoinedMessage = {
+  type: 'user-joined'
+  userId: number
+  roomId: string
+}
+
+type UserLeftMessage = {
+  type: 'user-left'
+  userId: number
+  roomId: string
+}
+
+type RoomUsersMessage = {
+  type: "room-users"
+  users: number[]
+}
+
 type ChatMessage = {
   type: 'sendMessage'
   message: string
@@ -28,6 +45,9 @@ type ErrorMessage = {
 export type SocketMessage =
   | JoinedRoomMessage
   | LeftRoomMessage
+  | UserJoinedMessage
+  | UserLeftMessage
+  |RoomUsersMessage
   | ChatMessage
   | ErrorMessage
 
@@ -35,7 +55,7 @@ export const useSocket = () => {
   const socketRef = useRef<WebSocket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [lastMessage, setLastMessage] = useState<SocketMessage | null>(null)
-
+  const [onlineUsers, setOnlineUsers] = useState<number[]>([])
   const connect = (token: string) => {
     if (socketRef.current) return // already connected
 
@@ -52,6 +72,22 @@ export const useSocket = () => {
         const data = JSON.parse(event.data) as SocketMessage
         console.log('WS message:', data)
         setLastMessage(data)
+         // realtime state handling
+
+         if(data.type === "room-users"){
+          setOnlineUsers(data.users)
+        }
+      
+         
+         if (data.type === 'user-joined') {
+          setOnlineUsers(prev => [...prev, data.userId])
+        }
+
+        if (data.type === 'user-left') {
+          setOnlineUsers(prev => prev.filter(id => id !== data.userId))
+         
+        }
+
       } catch (e) {
         console.error('Invalid WS message', e)
       }
@@ -85,6 +121,7 @@ export const useSocket = () => {
   return {
     isConnected,
     lastMessage,
+    onlineUsers,
     connect,
     send,
     disconnect,

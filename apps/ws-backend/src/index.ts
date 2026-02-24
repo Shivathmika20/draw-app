@@ -17,10 +17,11 @@ const users:User[]=[];
 const checkUser = (token: string): string | null => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { userId?: string };
-    if (!decoded || typeof decoded === 'string' || !decoded.userId) {
-        return null;
-    }
-    return decoded.userId; 
+    return decoded?.userId ?? null
+    // if (!decoded || typeof decoded === 'string' || !decoded.userId) {
+    //     return null;
+    // }
+    // return decoded.userId; 
   } 
   catch (err) {
     console.error('Error verifying token:', err);
@@ -119,6 +120,29 @@ wss.on('connection', (ws: WebSocket, req) => {
         
         // Add user to room
         user.rooms.push(roomId.toString());
+
+
+        users.forEach(u => {
+          if (u.rooms?.includes(roomId)) {
+            u.ws.send(JSON.stringify({
+              type: "user-joined",
+              roomId,
+              userId:user.userId
+            }));
+          }
+        });
+        
+  // send current online users to the person who joined
+        ws.send(JSON.stringify({
+          type: "room-users",
+          users: users
+            .filter(u => u.rooms.includes(roomId))
+            .map(u => u.userId)
+        }))
+
+        // broadcast to everyone
+        
+        
         ws.send(JSON.stringify({ 
           type: 'joined room', 
           roomId: roomId,
@@ -131,6 +155,16 @@ wss.on('connection', (ws: WebSocket, req) => {
         if(user){
           user.rooms=user?.rooms?.filter(room=>room!==roomId); //keep rooms that are not the roomId
         }
+
+        users.forEach(u => {
+          if (u.rooms?.includes(roomId)) {
+            u.ws.send(JSON.stringify({
+              type: "user-left",
+              roomId,
+              userId: user?.userId
+            }));
+          }
+        });
         
         ws.send(JSON.stringify({ 
           type: 'left room', 
@@ -196,6 +230,21 @@ wss.on('connection', (ws: WebSocket, req) => {
       const index = users.findIndex(user => user.ws === ws);
       if (index !== -1) {
         users.splice(index, 1);
+      }
+      const user = users.find(u => u.ws === ws)
+
+      if (user) {
+        user.rooms.forEach(roomId => {
+          users.forEach(u => {
+            if (u.rooms.includes(roomId)) {
+              u.ws.send(JSON.stringify({
+                type: "user-left",
+                roomId,
+                userId: user.userId
+              }))
+            }
+          })
+        })
       }
       console.log('Client disconnected');
       
