@@ -1,6 +1,6 @@
 import {Tools,Tool} from "@repo/common-types/tools"
 import { Button } from "@repo/ui/components/ui/button";
-import { MousePointer, Square, Pencil, Slash, Type } from "lucide-react";
+import { MousePointer, Square, Pencil, Slash, Type,Eraser } from "lucide-react";
 
 type Props={
   tool:Tool,
@@ -26,9 +26,9 @@ const toolItems:Items[]=
     label: "Rectangle",
   },
   {
-    tool: Tools.Pencil,
+    tool: Tools.Pen,
     icon: <Pencil  />,
-    label: "Pencil",
+    label: "Pen",
   },
   {
     tool: Tools.Line,
@@ -40,7 +40,11 @@ const toolItems:Items[]=
     icon: <Type  size={4}/>,
     label: "Text",
   },
-  
+  {
+    tool: Tools.Eraser,
+    icon: <Eraser  size={4}/>,
+    label: "Eraser",
+  },
 
 ]
 
