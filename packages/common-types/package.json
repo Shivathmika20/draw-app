@@ -5,7 +5,11 @@
   "main": "./src/types.ts",
   "exports": {
     "./types": "./src/types.ts",
-    "./roomtypes":"./src/roomtypes.ts"
+    "./roomtypes":"./src/roomtypes.ts",
+    "./tools":"./src/tools.ts",
+    "./canavs":"./src/canvastypes.ts",
+    "./wstype":"./src/wstypes.ts"
+
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

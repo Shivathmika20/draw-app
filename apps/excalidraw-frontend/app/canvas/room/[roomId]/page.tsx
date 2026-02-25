@@ -1,10 +1,15 @@
-import ToolBar from './ToolBar'
+import ToolRoom from './RoomHeader'
 import CanvasBoard from './CanvasBoard'
 import { GetRoomAction } from '@/actions/room-server-action'
 import { notFound } from "next/navigation"
 import { Room } from '@repo/common-types/roomtypes'
 
+
+
+
+
 const Page = async ({ params }: { params: { roomId: string } }) => {
+
   const { roomId } = await params
 
   const roomInfo = await GetRoomAction({ roomId })
@@ -17,8 +22,8 @@ const Page = async ({ params }: { params: { roomId: string } }) => {
 
   return (
     <div>
-      <ToolBar room={room} />
-      <CanvasBoard />
+      <ToolRoom room={room} />
+     
     </div>
   )
 }

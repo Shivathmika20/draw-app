@@ -1,112 +1,70 @@
-'use client'
-import { Room ,Member} from '@repo/common-types/roomtypes'
-import { Button } from '@repo/ui/components/ui/button';
-import { UsersRound } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useSocketContext } from '@/providers/SocketProvider'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation';
+import {Tools,Tool} from "@repo/common-types/tools"
+import { Button } from "@repo/ui/components/ui/button";
+import { MousePointer, Square, Pencil, Slash, Type } from "lucide-react";
 
-type ToolBarProps = {
-  room: Room;
-};
+type Props={
+  tool:Tool,
+  setTool:(tool:Tool)=>void
+}
 
-const ToolBar = ({ room }: ToolBarProps) => {
+type Items={
+  tool:Tool;
+  icon:React.ReactNode;
+  label:string;
+}
 
-  const [open,setOpen]=useState(false)
-  const router=useRouter()
-  const { onlineUsers,lastMessage,send } = useSocketContext()
-
-  useEffect(() => {
-    
-    if (!lastMessage) return
-    console.log('Got WS data in component:', lastMessage)
-
-    if (lastMessage.type === 'error') {
-      toast.error(lastMessage.message)
-    }
-
-    if (lastMessage.type === 'left room') {
-
-      toast.success(`left room ${lastMessage.roomId}`)
-      router.push(`/`)
-    }
-  },[lastMessage,router]
-)
-
-  const handleLeave=()=>{
-    send({
-      type:"leave-room",
-      roomId:room.slug
-    })
-  }
+const toolItems:Items[]=
+[
+  {
+    tool: Tools.Select,
+    icon: <MousePointer />,
+    label: "Select",
+  },
+  {
+    tool: Tools.Rectangle,
+    icon: <Square  />,
+    label: "Rectangle",
+  },
+  {
+    tool: Tools.Pencil,
+    icon: <Pencil  />,
+    label: "Pencil",
+  },
+  {
+    tool: Tools.Line,
+    icon: <Slash  />,
+    label: "Line",
+  },
+  {
+    tool: Tools.Text,
+    icon: <Type  size={4}/>,
+    label: "Text",
+  },
   
+
+]
+
+function ToolBar({tool,setTool}:Props) {
   return (
-    <div className="p-4 border-b flex justify-between items-center">
-      {/* left  */}
-      <div>
-        <h2 className="font-bold text-lg">{room.slug.toUpperCase()}</h2>
-        <p className="text-sm text-gray-500">
-          Admin: {room.admin.name}
-        </p>
-      </div>
-    
-      {/* right */}
-      <div className='flex gap-4 '>
-       <div>
-        <Button className='relative rounded-full px-3 text-accent bg-transparent border border-zinc-600 hover:bg-transparent hover:cursor-pointer'
-          onClick={()=>(setOpen(prev => !prev))}
+    <div className="flex space-x-2 border border-zinc-600 rounded-xl w-xl items-center justify-center py-2">
+    {
+      toolItems.map((item)=>(
+       
+        <Button   key={item.tool}
+        onClick={()=>setTool(item.tool)}
+        title={item.label} //tooltip
+        className={`text-white bg-transparent hover:bg-accent/20 transition-colors p-1.5 h-8 w-8
+          ${tool === item.tool ? "bg-accent/50 hover:bg-accent/50 hover: border hover:border-accent/60 hover:cursor-pointer" : ""}`}
         >
-            <UsersRound/>
+         {item.icon}
+       
         </Button>
-       </div> 
-        <div>
-        <Button className='hover:cursor-pointer' onClick={handleLeave}>Leave Room</Button>
-        </div>
-      </div>
 
-      {/* dropdown */}
-      {open && (
-          <div className='absolute right-5 top-18 w-40 bg-zinc-900 border rounded-lg shadow-lg p-3 text-foreground'>
-              <div className='space-y-2 '>
-         
-              {room.members && room.members.length > 0 ? (
-              room.members.map((member: Member) => {
+      
 
-                  const isOnline = onlineUsers.includes(member.id)
-                 
-                  return (
-                    <div key={member.id} className='flex items-center space-x-2'>
-                      
-                      <div className="relative">
-                        <div className="w-8 h-8 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-sm font-semibold">
-                          {member.name?.[0]?.toUpperCase()}
-                        </div>
-
-                        {/* online indicator */}
-                        {isOnline ? (
-                               <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full border border-black"/>
-                        ):(
-                          <span className="absolute bottom-0 right-0 w-2 h-2 bg-gray-500 rounded-full border border-black"/>
-                        )}
-                        
-                      </div>
-                      <span>{member.name}</span>
-                      
-
-                    </div>
-                  )
-                })
-              ) : (
-                <span className="text-xs text-gray-400 italic">
-                  No one joined yet
-                </span>
-              )}
-            </div>
-        </div>
-      )}
-
-  </div>
+      ))
+    }
+    </div>
   )
 }
 
