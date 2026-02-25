@@ -1,11 +1,14 @@
 export type ElementType =
+| "select"
   | "rectangle"
-  | "pencil"
+  | "pen"
   | "line"
-  | "text";
+  | "text"
+  |"eraser"
+  ;
 
 export interface DrawElement {
-    id: string;
+  
     type: ElementType;
   
     x1: number;
