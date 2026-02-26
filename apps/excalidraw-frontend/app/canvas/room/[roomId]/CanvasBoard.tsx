@@ -44,10 +44,7 @@ function CanvasBoard({tool}:Prop) {
       const hit = textBoxes.find(tb =>
         x >= tb.x && x <= tb.x + 200 && y >= tb.y - 20 && y <= tb.y + 10
       )
-      // Check if clicking on an existing text box
-      // const hit = textBoxes.find(tb => {
-      //   return x >= tb.x && x <= tb.x + 200 && y >= tb.y - 20 && y <= tb.y + 10
-      // })
+      
       if (hit) {
         setDraggingText({ id: hit.id, offsetX: x - hit.x, offsetY: y - hit.y })
         return
@@ -62,7 +59,7 @@ function CanvasBoard({tool}:Prop) {
 
     setDrawing(true);
 
-    // ── Pen: start a new element with points array ──
+   
     if (tool === "pen") {
       const newElement: ExtendedDrawElement = {
         type: "pen",
@@ -109,7 +106,7 @@ function CanvasBoard({tool}:Prop) {
     if (tool === "eraser") {
       setElements(prev => prev.filter(el => !isHit(el, x, y)))
       
-      // Also erase text boxes by checking proximity
+      
       setTextBoxes(prev =>
         prev.filter(tb => {
           const inX = x >= tb.x && x <= tb.x + 200
