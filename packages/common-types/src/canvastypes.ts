@@ -8,7 +8,7 @@ export type ElementType =
   ;
 
 export interface DrawElement {
-  
+    id:string
     type: ElementType;
   
     x1: number;

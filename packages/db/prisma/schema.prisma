@@ -39,3 +39,5 @@ model User {
   rooms      Room[]   @relation("AdminRooms")
   memberRooms     Room[]   @relation("RoomMembers")
 }
+
+
