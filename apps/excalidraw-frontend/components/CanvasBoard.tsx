@@ -327,26 +327,10 @@ function CanvasBoard({tool}:Prop) {
         style={{ cursor }}
       />
 
-      {/* Undo / Redo buttons */}
-      <div className="absolute left-[35%] translate-x-1/2 flex gap-2 z-20">
-        <button
-          onClick={undo}
-          title="Undo (Ctrl+Z)"
-          className="bg-white/10 text-white border border-white/20 rounded-md px-4 py-1.5 text-sm cursor-pointer backdrop-blur-sm hover:bg-white/20 transition-colors"
-        >
-          ↩ Undo
-        </button>
-        <button
-          onClick={redo}
-          title="Redo (Ctrl+Y)"
-          className="bg-white/10 text-white border border-white/20 rounded-md px-4 py-1.5 text-sm cursor-pointer backdrop-blur-sm hover:bg-white/20 transition-colors"
-        >
-          ↪ Redo
-        </button>
-      </div>
+      
 
       {/* Draggable Text Boxes */}
-      {/* left/top are dynamic values so style prop is needed */}
+      
       {textBoxes.map(tb => (
         <textarea
           key={tb.id}
