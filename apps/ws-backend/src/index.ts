@@ -117,7 +117,6 @@ wss.on('connection', (ws: WebSocket, req) => {
         // Add user to room
         user.rooms.push(roomId.toString());
 
-
         users.forEach(u => {
           if (u.rooms?.includes(roomId)) {
             u.ws.send(JSON.stringify({
@@ -131,9 +130,6 @@ wss.on('connection', (ws: WebSocket, req) => {
   // send current online users to the person who joined
         ws.send(JSON.stringify({
           type: "room-users",
-          // users: users
-          //   .filter(u => u.rooms.includes(roomId))
-          //   .map(u =>Number( u.userId))
           users:[...new Set(
             users
               .filter(u => u.rooms.includes(roomId))
@@ -148,8 +144,8 @@ wss.on('connection', (ws: WebSocket, req) => {
           type: 'joined room', 
           roomId: roomId,
         }));
-        // add this in join-room handler
-console.log('all users after join:', users.map(u => ({ id: u.userId, rooms: u.rooms })))
+        // add this in join-room handler  
+        console.log('all users after join:', users.map(u => ({ id: u.userId, rooms: u.rooms })))
       }
 
       if(message.type==='leave-room'){
@@ -263,6 +259,7 @@ console.log('all users after join:', users.map(u => ({ id: u.userId, rooms: u.ro
           }
         })
       }
+
       if (message.type === 'update') {
         const user = users.find(x => x.ws === ws)
         if (!user) return
@@ -351,7 +348,8 @@ console.log('all users after join:', users.map(u => ({ id: u.userId, rooms: u.ro
           }
         })
       }
-      } 
+
+    } 
       catch (error) {
         console.error('Error parsing message:', error);
         ws.send(JSON.stringify({type:'error', message:'Invalid message format'}));
