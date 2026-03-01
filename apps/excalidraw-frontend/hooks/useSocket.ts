@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { ExtendedDrawElement } from "../components/CanvasBoard";
+import { TextBox } from "../components/CanvasBoard";
 // ---- Message Types ----
 type JoinedRoomMessage = {
 	type: "joined room";
@@ -66,6 +67,25 @@ type UpdateMessage = {
 	roomId: string;
 };
 
+
+type TextAddMessage = {
+	type: 'text-add'
+	textBox: TextBox
+	roomId: string
+  }
+  
+  type TextUpdateMessage = {
+	type: 'text-update'
+	textBox: TextBox
+	roomId: string
+  }
+  
+type TextEraseMessage = {
+	type: 'text-erase'
+	id: string
+	roomId: string
+  }
+
 export type SocketMessage =
 	| JoinedRoomMessage
 	| LeftRoomMessage
@@ -77,7 +97,10 @@ export type SocketMessage =
 	| DrawMessage
 	| UpdateMessage
 	| SyncMessage
-	| EraseMessage;
+	| EraseMessage
+	| TextAddMessage
+    | TextUpdateMessage
+    | TextEraseMessage
 
 export const useSocket = () => {
 	const socketRef = useRef<WebSocket | null>(null);
@@ -124,9 +147,15 @@ export const useSocket = () => {
 					if (data.type === "user-joined")
 						setOnlineUsers((prev) => [...prev, data.userId]);
 					if (data.type === "user-left")
+					{
 						setOnlineUsers((prev) =>
 							prev.filter((id) => id !== data.userId),
+					
 						);
+						
+					}
+						
+						
 					return;
 				}
 

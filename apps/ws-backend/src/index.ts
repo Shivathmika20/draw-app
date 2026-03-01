@@ -249,10 +249,10 @@ console.log('all users after join:', users.map(u => ({ id: u.userId, rooms: u.ro
           }
         })
         console.log('users in room:', users.filter(u => u.rooms.includes(roomSlug)).length)
-        // in your draw handler
-console.log('draw received from user:', user.userId)
-console.log('broadcasting to N users:', users.filter(u => u.rooms.includes(roomSlug)).length)
-        // broadcast to everyone else in the room
+      
+        console.log('draw received from user:', user.userId)
+        console.log('broadcasting to N users:', users.filter(u => u.rooms.includes(roomSlug)).length)
+        // broadcasting
         users.forEach(u => {
           if (u.rooms.includes(roomSlug) ) {
             u.ws.send(JSON.stringify({
@@ -275,7 +275,8 @@ console.log('broadcasting to N users:', users.filter(u => u.rooms.includes(roomS
             u.ws.send(JSON.stringify({
               type: 'update',
               element: message.element,
-              roomId: roomSlug
+              roomId: roomSlug,
+              
             }))
           }
         })
@@ -297,11 +298,65 @@ console.log('broadcasting to N users:', users.filter(u => u.rooms.includes(roomS
           }
         })
       }
+
+     
+      if (message.type === 'text-add') {
+        const user = users.find(x => x.ws === ws)
+        if (!user) return
+        const roomSlug = message.roomId
+        if (!user.rooms.includes(roomSlug)) return
+
+        // broadcast to everyone in room
+        users.forEach(u => {
+          if (u.rooms.includes(roomSlug)) {
+            u.ws.send(JSON.stringify({
+              type: 'text-add',
+              textBox: message.textBox,
+              roomId: roomSlug
+            }))
+          }
+        })
+      }
+
+      if (message.type === 'text-update') {
+        const user = users.find(x => x.ws === ws)
+        if (!user) return
+        const roomSlug = message.roomId
+        if (!user.rooms.includes(roomSlug)) return
+
+        users.forEach(u => {
+          if (u.rooms.includes(roomSlug)) {
+            u.ws.send(JSON.stringify({
+              type: 'text-update',
+              textBox: message.textBox,
+              roomId: roomSlug
+            }))
+          }
+        })
+      }
+
+      if (message.type === 'text-erase') {
+        const user = users.find(x => x.ws === ws)
+        if (!user) return
+        const roomSlug = message.roomId
+        if (!user.rooms.includes(roomSlug)) return
+
+        users.forEach(u => {
+          if (u.rooms.includes(roomSlug)) {
+            u.ws.send(JSON.stringify({
+              type: 'text-erase',
+              id: message.id,
+              roomId: roomSlug
+            }))
+          }
+        })
+      }
       } 
       catch (error) {
         console.error('Error parsing message:', error);
         ws.send(JSON.stringify({type:'error', message:'Invalid message format'}));
       }
+
 
       
       
@@ -324,7 +379,7 @@ console.log('broadcasting to N users:', users.filter(u => u.rooms.includes(roomS
               u.ws.send(JSON.stringify({
                 type: "user-left",
                 roomId,
-                userId: user.userId
+                userId: Number(user.userId)
               }))
             }
           })

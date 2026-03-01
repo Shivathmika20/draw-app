@@ -2,6 +2,7 @@ import { Tool } from "@repo/common-types/tools";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { DrawElement } from "@repo/common-types/canavs";
 import { useSocketContext } from "@/providers/SocketProvider";
+import { Member } from "@repo/common-types/roomtypes";
 
 type Prop = {
 	tool: Tool;
@@ -14,7 +15,7 @@ export type ExtendedDrawElement = DrawElement & {
 	dragging?: boolean;
 };
 
-type TextBox = {
+export type TextBox = {
 	id: string;
 	x: number;
 	y: number;
@@ -32,13 +33,16 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 function CanvasBoard({ tool, roomId }: Prop) {
 	const { send, onMessage } = useSocketContext();
 	// console.log("CanvasBoard render, onMessage:", typeof onMessage); // ← add this
-
+	
+	
+	
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	// const lastMsgRef    = useRef<string | null>(null)   // tracks last processed message to avoid cascades
 
 	const [elements, setElements] = useState<ExtendedDrawElement[]>([]);
 	const [drawing, setDrawing] = useState(false);
 	const [textBoxes, setTextBoxes] = useState<TextBox[]>([]);
+	
 	const [draggingText, setDraggingText] = useState<{
 		id: string;
 		offsetX: number;
@@ -127,25 +131,42 @@ function CanvasBoard({ tool, roomId }: Prop) {
 				});
 			}
 			if (msg.type === "update") {
-        setElements((prev) => {
-            const exists = prev.some((el) => el.id === msg.element.id);
-            if (exists) {
-                return prev.map((el) =>
-                    el.id === msg.element.id ? msg.element : el
-                );
-            } else {
-                return [...prev, msg.element];
-            }
-        });
-    }
+				setElements((prev) => {
+					const exists = prev.some((el) => el.id === msg.element.id);
+					if (exists) {
+						return prev.map((el) =>
+							el.id === msg.element.id ? msg.element : el
+						);
+					} else {
+						return [...prev, msg.element];
+					}
+				});
+    		}
 			if (msg.type === "erase") {
 				setElements((prev) =>
 					prev.filter((el) => el.id !== msg.elementId),
 				);
+				
 			}
 			if (msg.type === "sync") {
 				setElements(msg.elements);
 			}
+			if (msg.type === 'text-add') {
+				setTextBoxes(prev => {
+				  if (prev.some(tb => tb.id === msg.textBox.id)) return prev
+				  return [...prev, msg.textBox]
+				})
+			  }
+			  
+			  if (msg.type === 'text-update') {
+				setTextBoxes(prev =>
+				  prev.map(tb => tb.id === msg.textBox.id ? msg.textBox : tb)
+				)
+			  }
+			  
+			  if (msg.type === 'text-erase') {
+				setTextBoxes(prev => prev.filter(tb => tb.id !== msg.id))
+			  }
 		});
 
 		return unsub; // cleanup when component unmounts
@@ -222,6 +243,7 @@ function CanvasBoard({ tool, roomId }: Prop) {
 				editing: true,
 			};
 			setTextBoxes((prev) => [...prev, newBox]);
+			send({ type: 'text-add', textBox: newBox, roomId });
 			return;
 		}
 
@@ -303,31 +325,27 @@ function CanvasBoard({ tool, roomId }: Prop) {
 		// Eraser
 		if (tool === "eraser") {
 			const toErase = elements.filter((el) => isHit(el, x, y));
-			const willErase = toErase.length > 0;
-			const willEraseText = textBoxes.some(
-				(tb) =>
-					x >= tb.x &&
-					x <= tb.x + 200 &&
-					y >= tb.y - 24 &&
-					y <= tb.y + 60,
-			);
-			if (willErase || willEraseText) saveSnapshot();
-
-			// broadcast each erased element
-			toErase.forEach((el) =>
-				send({ type: "erase", elementId: el.id, roomId }),
-			);
-
+			const toEraseText = textBoxes.filter((tb) => {        // ← changed to filter
+			  const inX = x >= tb.x && x <= tb.x + 200;
+			  const inY = y >= tb.y - 24 && y <= tb.y + 60;
+			  return inX && inY;
+			});
+		  
+			if (toErase.length > 0 || toEraseText.length > 0) saveSnapshot();
+		  
+			toErase.forEach((el) => send({ type: "erase", elementId: el.id, roomId }));
+			toEraseText.forEach((tb) => send({ type: "text-erase", id: tb.id, roomId }))  // ← add
+		  
 			setElements((prev) => prev.filter((el) => !isHit(el, x, y)));
 			setTextBoxes((prev) =>
-				prev.filter((tb) => {
-					const inX = x >= tb.x && x <= tb.x + 200;
-					const inY = y >= tb.y - 24 && y <= tb.y + 60;
-					return !(inX && inY);
-				}),
+			  prev.filter((tb) => {
+				const inX = x >= tb.x && x <= tb.x + 200;
+				const inY = y >= tb.y - 24 && y <= tb.y + 60;
+				return !(inX && inY);
+			  })
 			);
 			return;
-		}
+		  }
 
 		if (!drawing) return;
 
@@ -464,40 +482,17 @@ function CanvasBoard({ tool, roomId }: Prop) {
 				className="absolute top-0 left-0 w-full h-full"
 				style={{ cursor }}
 			/>
-
-			{/* Undo / Redo buttons */}
-			{/* <div className="absolute top-4 right-[10%] -translate-x-1/2 flex gap-2 z-20">
-        <button
-          onClick={undo}
-          title="Undo (Ctrl+Z)"
-          className="bg-white/10 text-white border border-white/20 rounded-md px-4 py-1.5 text-sm cursor-pointer backdrop-blur-sm hover:bg-white/20 transition-colors"
-        >
-          ↩ Undo
-        </button>
-        <button
-          onClick={redo}
-          title="Redo (Ctrl+Y)"
-          className="bg-white/10 text-white border border-white/20 rounded-md px-4 py-1.5 text-sm cursor-pointer backdrop-blur-sm hover:bg-white/20 transition-colors"
-        >
-          ↪ Redo
-        </button>
-      </div> */}
-
 			{/* Draggable Text Boxes */}
 			{textBoxes.map((tb) => (
 				<textarea
 					key={tb.id}
 					autoFocus={tb.editing}
 					value={tb.text}
-					onChange={(e) =>
-						setTextBoxes((prev) =>
-							prev.map((t) =>
-								t.id === tb.id
-									? { ...t, text: e.target.value }
-									: t,
-							),
-						)
-					}
+					onChange={e => {
+						const updated = { ...tb, text: e.target.value }
+						setTextBoxes(prev => prev.map(t => t.id === tb.id ? updated : t))
+						send({ type: 'text-update', textBox: updated, roomId })  // ← add
+					  }}
 					className="absolute bg-transparent text-white border border-dashed border-transparent outline-none resize font-sans text-base min-w-[120px] min-h-[40px] p-1 z-10 caret-white hover:border-white/30 focus:border-white/50 transition-colors"
 					style={{ left: tb.x, top: tb.y }}
 					onMouseDown={(e) => {

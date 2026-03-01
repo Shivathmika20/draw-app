@@ -124,7 +124,7 @@ const ToolRoom = ({ room }: ToolRoomProps) => {
 			</div>
 
 			<div className="w-screen h-screen relative">
-				<CanvasBoard tool={tool} roomId={room.slug} />
+				<CanvasBoard tool={tool} roomId={room.slug}  />
 			</div>
 		</>
 	);

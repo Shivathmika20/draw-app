@@ -68,11 +68,12 @@ export function JoinDialog() {
 
   const handleJoin = async () => {
     if (!isConnected) {
-      toast.loading("Connecting...")
+      console.log(isConnected)
+      toast.loading("Please login to join a room")
       return
     }
     if (!roomId.trim()) {
-      toast.error('Enter a room ID')
+      toast.error('Please enter a room ID')
       return
     }
   
