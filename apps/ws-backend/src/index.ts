@@ -18,10 +18,6 @@ const checkUser = (token: string): string | null => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { userId?: string };
     return decoded?.userId ?? null
-    // if (!decoded || typeof decoded === 'string' || !decoded.userId) {
-    //     return null;
-    // }
-    // return decoded.userId; 
   } 
   catch (err) {
     console.error('Error verifying token:', err);
@@ -127,7 +123,7 @@ wss.on('connection', (ws: WebSocket, req) => {
             u.ws.send(JSON.stringify({
               type: "user-joined",
               roomId,
-              userId:user.userId
+              userId:Number(user.userId)
             }));
           }
         });
@@ -135,9 +131,14 @@ wss.on('connection', (ws: WebSocket, req) => {
   // send current online users to the person who joined
         ws.send(JSON.stringify({
           type: "room-users",
-          users: users
-            .filter(u => u.rooms.includes(roomId))
-            .map(u => u.userId)
+          // users: users
+          //   .filter(u => u.rooms.includes(roomId))
+          //   .map(u =>Number( u.userId))
+          users:[...new Set(
+            users
+              .filter(u => u.rooms.includes(roomId))
+              .map(u => Number(u.userId))
+          )]
         }))
 
         // broadcast to everyone
@@ -147,6 +148,8 @@ wss.on('connection', (ws: WebSocket, req) => {
           type: 'joined room', 
           roomId: roomId,
         }));
+        // add this in join-room handler
+console.log('all users after join:', users.map(u => ({ id: u.userId, rooms: u.rooms })))
       }
 
       if(message.type==='leave-room'){
@@ -216,10 +219,94 @@ wss.on('connection', (ws: WebSocket, req) => {
           })
         
       }
-      } catch (error) {
+
+      if (message.type === 'draw') {
+        console.log('element received:', message.element) 
+        const user = users.find(x => x.ws === ws)
+        if (!user) return
+      
+        const roomSlug = message.roomId
+        if (!user.rooms.includes(roomSlug)) return
+      
+        const room = await prisma.room.findUnique({
+          where: { slug: roomSlug },
+          select: { id: true }
+        })
+        if (!room) return
+      
+        // save to DB
+        await prisma.drawing.create({
+          data: {
+            elementId: message.element.id,
+            type:      message.element.type,
+            x1:        message.element.x1,
+            y1:        message.element.y1,
+            x2:        message.element.x2,
+            y2:        message.element.y2,
+            points:    message.element.points ? JSON.stringify(message.element.points) : null,
+            userId:    Number(user.userId),
+            roomId:    room.id
+          }
+        })
+        console.log('users in room:', users.filter(u => u.rooms.includes(roomSlug)).length)
+        // in your draw handler
+console.log('draw received from user:', user.userId)
+console.log('broadcasting to N users:', users.filter(u => u.rooms.includes(roomSlug)).length)
+        // broadcast to everyone else in the room
+        users.forEach(u => {
+          if (u.rooms.includes(roomSlug) ) {
+            u.ws.send(JSON.stringify({
+              type:    'draw',
+              element: message.element,
+              roomId:  roomSlug
+            }))
+          }
+        })
+      }
+      if (message.type === 'update') {
+        const user = users.find(x => x.ws === ws)
+        if (!user) return
+        const roomSlug = message.roomId
+        if (!user.rooms.includes(roomSlug)) return
+      
+        // broadcast to everyone in room
+        users.forEach(u => {
+          if (u.rooms.includes(roomSlug)) {
+            u.ws.send(JSON.stringify({
+              type: 'update',
+              element: message.element,
+              roomId: roomSlug
+            }))
+          }
+        })
+      }
+      
+      if (message.type === 'erase') {
+        const user = users.find(x => x.ws === ws)
+        if (!user) return
+        const roomSlug = message.roomId
+        if (!user.rooms.includes(roomSlug)) return
+      
+        users.forEach(u => {
+          if (u.rooms.includes(roomSlug)) {
+            u.ws.send(JSON.stringify({
+              type: 'erase',
+              elementId: message.elementId,
+              roomId: roomSlug
+            }))
+          }
+        })
+      }
+      } 
+      catch (error) {
         console.error('Error parsing message:', error);
         ws.send(JSON.stringify({type:'error', message:'Invalid message format'}));
       }
+
+      
+      
+
+      
     })
     
     ws.on('error', (error) => {
@@ -227,16 +314,13 @@ wss.on('connection', (ws: WebSocket, req) => {
     });
     
     ws.on('close', () => {
-      const index = users.findIndex(user => user.ws === ws);
-      if (index !== -1) {
-        users.splice(index, 1);
-      }
-      const user = users.find(u => u.ws === ws)
-
+      const user = users.find(u => u.ws === ws)  // ← find FIRST
+    
       if (user) {
+        // notify others BEFORE removing
         user.rooms.forEach(roomId => {
           users.forEach(u => {
-            if (u.rooms.includes(roomId)) {
+            if (u.ws !== ws && u.rooms.includes(roomId)) {
               u.ws.send(JSON.stringify({
                 type: "user-left",
                 roomId,
@@ -246,9 +330,13 @@ wss.on('connection', (ws: WebSocket, req) => {
           })
         })
       }
-      console.log('Client disconnected');
-      
-    });
+    
+      // remove AFTER notifying
+      const index = users.findIndex(u => u.ws === ws)
+      if (index !== -1) users.splice(index, 1)
+    
+      console.log('Client disconnected')
+    })
     // ws.on('close', (code, reason) => {
     //   console.log('Client disconnected. code=', code, 'reason=', reason.toString());
     // });

@@ -26,6 +26,8 @@ model Room {
   Chat      Chat[]
   members   User[]   @relation("RoomMembers")
 
+
+  drawings Drawing[]
 }
 
 model User {
@@ -38,6 +40,21 @@ model User {
   Chat      Chat[]
   rooms      Room[]   @relation("AdminRooms")
   memberRooms     Room[]   @relation("RoomMembers")
+
+  drawings Drawing[]
 }
 
-
+model Drawing {
+  id        Int     @id @default(autoincrement())
+  elementId String  // the uid() from frontend
+  type      String  // rectangle, line, pen
+  x1        Float
+  y1        Float
+  x2        Float
+  y2        Float
+  points    String? // JSON string for pen strokes
+  userId    Int
+  roomId    Int
+  user      User    @relation(fields: [userId], references: [id])
+  room      Room    @relation(fields: [roomId], references: [id])
+}

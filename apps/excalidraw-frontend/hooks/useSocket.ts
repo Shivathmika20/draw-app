@@ -1,129 +1,177 @@
-'use client'
+"use client";
 
-import { useRef, useState } from 'react'
-
+import { useCallback, useRef, useState } from "react";
+import { ExtendedDrawElement } from "../components/CanvasBoard";
 // ---- Message Types ----
 type JoinedRoomMessage = {
-  type: 'joined room'
-  roomId: string
-}
+	type: "joined room";
+	roomId: string;
+};
 
 type LeftRoomMessage = {
-  type: 'left room'
-  roomId: string
-}
+	type: "left room";
+	roomId: string;
+};
 
 type UserJoinedMessage = {
-  type: 'user-joined'
-  userId: number
-  roomId: string
-}
+	type: "user-joined";
+	userId: number;
+	roomId: string;
+};
 
 type UserLeftMessage = {
-  type: 'user-left'
-  userId: number
-  roomId: string
-}
+	type: "user-left";
+	userId: number;
+	roomId: string;
+};
 
 type RoomUsersMessage = {
-  type: "room-users"
-  users: number[]
-}
+	type: "room-users";
+	users: number[];
+};
 
 type ChatMessage = {
-  type: 'sendMessage'
-  message: string
-  roomId: string
-  userId: string
-}
+	type: "sendMessage";
+	message: string;
+	roomId: string;
+	userId: string;
+};
 
 type ErrorMessage = {
-  type: 'error'
-  message: string
-}
+	type: "error";
+	message: string;
+};
+
+type DrawMessage = {
+	type: "draw";
+	element: ExtendedDrawElement;
+	roomId: string;
+};
+
+type EraseMessage = {
+	type: "erase";
+	elementId: string;
+	roomId: string;
+};
+
+type SyncMessage = {
+	type: "sync";
+	elements: ExtendedDrawElement[];
+	roomId: string;
+};
+
+type UpdateMessage = {
+	type: "update";
+	element: ExtendedDrawElement;
+	roomId: string;
+};
 
 export type SocketMessage =
-  | JoinedRoomMessage
-  | LeftRoomMessage
-  | UserJoinedMessage
-  | UserLeftMessage
-  |RoomUsersMessage
-  | ChatMessage
-  | ErrorMessage
+	| JoinedRoomMessage
+	| LeftRoomMessage
+	| UserJoinedMessage
+	| UserLeftMessage
+	| RoomUsersMessage
+	| ChatMessage
+	| ErrorMessage
+	| DrawMessage
+	| UpdateMessage
+	| SyncMessage
+	| EraseMessage;
 
 export const useSocket = () => {
-  const socketRef = useRef<WebSocket | null>(null)
-  const [isConnected, setIsConnected] = useState(false)
-  const [lastMessage, setLastMessage] = useState<SocketMessage | null>(null)
-  const [onlineUsers, setOnlineUsers] = useState<number[]>([])
-  const connect = (token: string) => {
-    if (socketRef.current) return // already connected
+	const socketRef = useRef<WebSocket | null>(null);
+	const [isConnected, setIsConnected] = useState(false);
+	const [lastMessage, setLastMessage] = useState<SocketMessage | null>(null);
+	const listenersRef = useRef<((msg: SocketMessage) => void)[]>([]);
+	const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
 
-    const ws = new WebSocket(`ws://localhost:8080?token=${token}`)
-    socketRef.current = ws
+	const onMessage = useCallback((cb: (msg: SocketMessage) => void) => {
+		listenersRef.current.push(cb);
+		// return cleanup function
+		return () => {
+			listenersRef.current = listenersRef.current.filter((l) => l !== cb);
+		};
+	}, []);
 
-    ws.onopen = () => {
-      console.log('Connected to socket')
-      setIsConnected(true)
-    }
+	const connect = (token: string) => {
+		if (socketRef.current) return; // already connected
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data) as SocketMessage
-        console.log('WS message:', data)
-        setLastMessage(data)
-         // realtime state handling
+		const ws = new WebSocket(`ws://localhost:8080?token=${token}`);
+		socketRef.current = ws;
 
-         if(data.type === "room-users"){
-          setOnlineUsers(data.users)
-        }
-      
-         
-         if (data.type === 'user-joined') {
-          setOnlineUsers(prev => [...prev, data.userId])
-        }
+		ws.onopen = () => {
+			console.log("Connected to socket");
+			setIsConnected(true);
+		};
 
-        if (data.type === 'user-left') {
-          setOnlineUsers(prev => prev.filter(id => id !== data.userId))
-         
-        }
+		ws.onmessage = (event) => {
+			try {
+				const data = JSON.parse(event.data) as SocketMessage;
+				// console.log("raw ws message:", data.type);
+        console.log("raw ws message:", data.type, "listeners count:", listenersRef.current.length)
+				// ── Room events → useState (these are infrequent, no cascade risk) ──
+				if (
+					data.type === "room-users" ||
+					data.type === "user-joined" ||
+					data.type === "user-left" ||
+					data.type === "joined room" ||
+					data.type === "left room" ||
+					data.type === "error"
+				) {
+					setLastMessage(data);
+					if (data.type === "room-users") setOnlineUsers(data.users);
+					if (data.type === "user-joined")
+						setOnlineUsers((prev) => [...prev, data.userId]);
+					if (data.type === "user-left")
+						setOnlineUsers((prev) =>
+							prev.filter((id) => id !== data.userId),
+						);
+					return;
+				}
 
-      } catch (e) {
-        console.error('Invalid WS message', e)
-      }
-    }
+				// ── Drawing events → direct callback (no setState, no cascade) ──
+				listenersRef.current.forEach((cb) => cb(data));
+			} catch (e) {
+				console.error("Invalid WS message", e);
+			}
+		};
 
-    ws.onclose = () => {
-      console.log('Disconnected from socket')
-      setIsConnected(false)
-      socketRef.current = null
-    }
+		ws.onclose = () => {
+			console.log("Disconnected from socket");
+			setIsConnected(false);
+			socketRef.current = null;
+		};
 
-    ws.onerror = (err) => {
-      console.error('WS error', err)
-    }
-  }
+		ws.onerror = (err) => {
+			console.error("WS error", err);
+		};
+	};
 
-  const send = (data: object) => {
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify(data))
-    } else {
-      console.warn('WebSocket not connected')
-    }
-  }
+	const send = (data: object) => {
+		if (
+			socketRef.current &&
+			socketRef.current.readyState === WebSocket.OPEN
+		) {
+			socketRef.current.send(JSON.stringify(data));
+		} else {
+			console.warn("WebSocket not connected");
+		}
+	};
 
-  const disconnect = () => {
-    socketRef.current?.close()
-    socketRef.current = null
-    setIsConnected(false)
-  }
+	const disconnect = () => {
+		socketRef.current?.close();
+		socketRef.current = null;
+		setIsConnected(false);
+	};
 
-  return {
-    isConnected,
-    lastMessage,
-    onlineUsers,
-    connect,
-    send,
-    disconnect,
-  }
-}
+	return {
+		isConnected,
+		lastMessage,
+		onMessage,
+		onlineUsers,
+		connect,
+		send,
+		disconnect,
+	};
+};

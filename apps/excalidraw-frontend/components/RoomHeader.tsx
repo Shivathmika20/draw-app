@@ -89,6 +89,8 @@ const ToolRoom = ({ room }: ToolRoomProps) => {
 									const isOnline = onlineUsers.includes(
 										member.id,
 									);
+									console.log('onlineUsers:', onlineUsers)        // what type? ["3"] or [3]?
+								console.log('member.id:', member.id, typeof member.id)  // number?
 
 									return (
 										<div
@@ -122,7 +124,7 @@ const ToolRoom = ({ room }: ToolRoomProps) => {
 			</div>
 
 			<div className="w-screen h-screen relative">
-				<CanvasBoard tool={tool} />
+				<CanvasBoard tool={tool} roomId={room.slug} />
 			</div>
 		</>
 	);
