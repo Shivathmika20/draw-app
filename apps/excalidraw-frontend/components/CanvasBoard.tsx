@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { DrawElement } from "@repo/common-types/canavs";
 import { useSocketContext } from "@/providers/SocketProvider";
 import { Member } from "@repo/common-types/roomtypes";
+import { toast } from "sonner";
 
 type Prop = {
 	tool: Tool;
@@ -42,6 +43,7 @@ function CanvasBoard({ tool, roomId }: Prop) {
 	const [elements, setElements] = useState<ExtendedDrawElement[]>([]);
 	const [drawing, setDrawing] = useState(false);
 	const [textBoxes, setTextBoxes] = useState<TextBox[]>([]);
+	
 	
 	const [draggingText, setDraggingText] = useState<{
 		id: string;
@@ -114,8 +116,7 @@ function CanvasBoard({ tool, roomId }: Prop) {
 		return () => window.removeEventListener("keydown", onKey);
 	}, [undo, redo]);
 
-  // console.log('onMessage type:', typeof onMessage) 
-	// Receive socket messages
+
 	useEffect(() => {
 		console.log("subscribing to onMessage");
     

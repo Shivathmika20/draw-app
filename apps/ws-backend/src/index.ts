@@ -40,6 +40,14 @@ async function canUserJoinRoom(userId: number, roomSlug: string) {
   return { room, isAdmin, isMember };
 }
 
+function broadcastToRoom(roomId: string, payload: any) {
+  users.forEach(u => {
+    if (u.rooms.includes(roomId)) { 
+      u.ws.send(JSON.stringify(payload));
+    }
+  })
+}
+
 wss.on('connection', (ws: WebSocket, req) => {
     console.log('Client connected');
     const url=req.url || ''; //ws://localhost:8080?token='12232'
@@ -61,6 +69,8 @@ wss.on('connection', (ws: WebSocket, req) => {
             ws
         }
     )
+
+    
     
 
     ws.on('message',async (data)=>{
@@ -114,18 +124,21 @@ wss.on('connection', (ws: WebSocket, req) => {
           return;
         }
         
+        const dbUser = await prisma.user.findUnique({
+          where: { id: Number(user.userId) }
+        })
+      
+        if (!dbUser) return
         // Add user to room
         user.rooms.push(roomId.toString());
 
-        users.forEach(u => {
-          if (u.rooms?.includes(roomId)) {
-            u.ws.send(JSON.stringify({
-              type: "user-joined",
-              roomId,
-              userId:Number(user.userId)
-            }));
-          }
-        });
+        broadcastToRoom(roomId,{
+          type: "user-joined",
+          roomId,
+          userId:Number(user.userId),
+           message:`User ${dbUser.name} joined`
+        })
+
         
   // send current online users to the person who joined
         ws.send(JSON.stringify({
@@ -144,6 +157,8 @@ wss.on('connection', (ws: WebSocket, req) => {
           type: 'joined room', 
           roomId: roomId,
         }));
+
+        
         // add this in join-room handler  
         console.log('all users after join:', users.map(u => ({ id: u.userId, rooms: u.rooms })))
       }
@@ -155,21 +170,27 @@ wss.on('connection', (ws: WebSocket, req) => {
           user.rooms=user?.rooms?.filter(room=>room!==roomId); //keep rooms that are not the roomId
         }
 
-        users.forEach(u => {
-          if (u.rooms?.includes(roomId)) {
-            u.ws.send(JSON.stringify({
-              type: "user-left",
-              roomId,
-              userId: user?.userId
-            }));
-          }
-        });
+        const dbUser = await prisma.user.findUnique({
+          where: { id: Number(user?.userId) }
+        })
+      
+        if (!dbUser) return
+
+        broadcastToRoom(roomId,{
+          type: "user-left",
+          roomId,
+          userId:Number(user?.userId),
+          message:`User ${dbUser.name} left`
+
+        })
         
         ws.send(JSON.stringify({ 
           type: 'left room', 
           roomId: roomId,
           
         }));
+
+      
       }
 
       if(message.type==='chat'){
@@ -229,6 +250,12 @@ wss.on('connection', (ws: WebSocket, req) => {
           select: { id: true }
         })
         if (!room) return
+
+        const dbUser = await prisma.user.findUnique({
+          where: { id: Number(user.userId) }
+        })
+      
+        if (!dbUser) return
       
         // save to DB
         await prisma.drawing.create({
@@ -249,15 +276,13 @@ wss.on('connection', (ws: WebSocket, req) => {
         console.log('draw received from user:', user.userId)
         console.log('broadcasting to N users:', users.filter(u => u.rooms.includes(roomSlug)).length)
         // broadcasting
-        users.forEach(u => {
-          if (u.rooms.includes(roomSlug) ) {
-            u.ws.send(JSON.stringify({
-              type:    'draw',
-              element: message.element,
-              roomId:  roomSlug
-            }))
-          }
+        broadcastToRoom(roomSlug,{
+          type: "draw",
+          element: message.element,
+          roomId: roomSlug,
+          message:`User ${dbUser.name} drew`
         })
+          
       }
 
       if (message.type === 'update') {
@@ -267,15 +292,11 @@ wss.on('connection', (ws: WebSocket, req) => {
         if (!user.rooms.includes(roomSlug)) return
       
         // broadcast to everyone in room
-        users.forEach(u => {
-          if (u.rooms.includes(roomSlug)) {
-            u.ws.send(JSON.stringify({
-              type: 'update',
-              element: message.element,
-              roomId: roomSlug,
-              
-            }))
-          }
+       
+        broadcastToRoom(roomSlug,{
+          type: "update",
+          element: message.element,
+          roomId: roomSlug
         })
       }
       
@@ -285,14 +306,10 @@ wss.on('connection', (ws: WebSocket, req) => {
         const roomSlug = message.roomId
         if (!user.rooms.includes(roomSlug)) return
       
-        users.forEach(u => {
-          if (u.rooms.includes(roomSlug)) {
-            u.ws.send(JSON.stringify({
-              type: 'erase',
-              elementId: message.elementId,
-              roomId: roomSlug
-            }))
-          }
+        broadcastToRoom(roomSlug,{
+          type:'erase',
+          elementId: message.elementId,
+          roomId: roomSlug
         })
       }
 
@@ -304,14 +321,10 @@ wss.on('connection', (ws: WebSocket, req) => {
         if (!user.rooms.includes(roomSlug)) return
 
         // broadcast to everyone in room
-        users.forEach(u => {
-          if (u.rooms.includes(roomSlug)) {
-            u.ws.send(JSON.stringify({
-              type: 'text-add',
-              textBox: message.textBox,
-              roomId: roomSlug
-            }))
-          }
+        broadcastToRoom(roomSlug,{
+          type: 'text-add',
+          textBox: message.textBox,
+          roomId: roomSlug
         })
       }
 
@@ -321,14 +334,10 @@ wss.on('connection', (ws: WebSocket, req) => {
         const roomSlug = message.roomId
         if (!user.rooms.includes(roomSlug)) return
 
-        users.forEach(u => {
-          if (u.rooms.includes(roomSlug)) {
-            u.ws.send(JSON.stringify({
-              type: 'text-update',
-              textBox: message.textBox,
-              roomId: roomSlug
-            }))
-          }
+        broadcastToRoom(roomSlug,{
+          type: 'text-update',
+          textBox: message.textBox,
+          roomId: roomSlug
         })
       }
 
@@ -338,14 +347,10 @@ wss.on('connection', (ws: WebSocket, req) => {
         const roomSlug = message.roomId
         if (!user.rooms.includes(roomSlug)) return
 
-        users.forEach(u => {
-          if (u.rooms.includes(roomSlug)) {
-            u.ws.send(JSON.stringify({
-              type: 'text-erase',
-              id: message.id,
-              roomId: roomSlug
-            }))
-          }
+        broadcastToRoom(roomSlug,{
+          type: 'text-erase',
+          id: message.id,
+          roomId: roomSlug
         })
       }
 

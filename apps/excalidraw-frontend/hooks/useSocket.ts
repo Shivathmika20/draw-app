@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { ExtendedDrawElement } from "../components/CanvasBoard";
 import { TextBox } from "../components/CanvasBoard";
+import { toast } from "sonner";
 // ---- Message Types ----
 type JoinedRoomMessage = {
 	type: "joined room";
@@ -18,12 +19,15 @@ type UserJoinedMessage = {
 	type: "user-joined";
 	userId: number;
 	roomId: string;
+	message:string;
 };
 
 type UserLeftMessage = {
 	type: "user-left";
 	userId: number;
 	roomId: string;
+	message:string;
+
 };
 
 type RoomUsersMessage = {
@@ -47,6 +51,8 @@ type DrawMessage = {
 	type: "draw";
 	element: ExtendedDrawElement;
 	roomId: string;
+	message:string;
+
 };
 
 type EraseMessage = {
@@ -86,6 +92,11 @@ type TextEraseMessage = {
 	roomId: string
   }
 
+  type ActivityMessage = {
+	type: "activity"
+	message: string
+  }
+
 export type SocketMessage =
 	| JoinedRoomMessage
 	| LeftRoomMessage
@@ -101,6 +112,8 @@ export type SocketMessage =
 	| TextAddMessage
     | TextUpdateMessage
     | TextEraseMessage
+  	| ActivityMessage
+
 
 export const useSocket = () => {
 	const socketRef = useRef<WebSocket | null>(null);
@@ -108,6 +121,7 @@ export const useSocket = () => {
 	const [lastMessage, setLastMessage] = useState<SocketMessage | null>(null);
 	const listenersRef = useRef<((msg: SocketMessage) => void)[]>([]);
 	const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
+	// const [activities, setActivities] = useState<string[]>([])
 
 	const onMessage = useCallback((cb: (msg: SocketMessage) => void) => {
 		listenersRef.current.push(cb);
@@ -132,7 +146,7 @@ export const useSocket = () => {
 			try {
 				const data = JSON.parse(event.data) as SocketMessage;
 				// console.log("raw ws message:", data.type);
-        console.log("raw ws message:", data.type, "listeners count:", listenersRef.current.length)
+        		console.log("raw ws message:", data.type, "listeners count:", listenersRef.current.length)
 				// ── Room events → useState (these are infrequent, no cascade risk) ──
 				if (
 					data.type === "room-users" ||
@@ -144,20 +158,27 @@ export const useSocket = () => {
 				) {
 					setLastMessage(data);
 					if (data.type === "room-users") setOnlineUsers(data.users);
-					if (data.type === "user-joined")
+					if (data.type === "user-joined"){
+						toast(data.message)
 						setOnlineUsers((prev) => [...prev, data.userId]);
+					
+					}
+						
 					if (data.type === "user-left")
+
 					{
+						toast(data.message)
 						setOnlineUsers((prev) =>
 							prev.filter((id) => id !== data.userId),
 					
 						);
-						
-					}
-						
-						
+					}	
 					return;
 				}
+				if(data.type==="draw"){
+					toast(data.message)
+				}
+				
 
 				// ── Drawing events → direct callback (no setState, no cascade) ──
 				listenersRef.current.forEach((cb) => cb(data));
@@ -202,5 +223,6 @@ export const useSocket = () => {
 		connect,
 		send,
 		disconnect,
+		
 	};
 };
