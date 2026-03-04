@@ -73,7 +73,10 @@ function CanvasBoard({ tool, roomId }: Prop) {
 		setElements(prev.elements);
 		setTextBoxes(prev.textBoxes);
 		setSelectedId(null);
-	}, [elements, textBoxes]);
+		
+
+		send({ type: "canvas-sync", elements: prev.elements, roomId })
+	}, [elements, textBoxes,send,roomId]);
 
 	const redo = useCallback(() => {
 		const next = redoStack.current.pop();
@@ -85,7 +88,10 @@ function CanvasBoard({ tool, roomId }: Prop) {
 		setElements(next.elements);
 		setTextBoxes(next.textBoxes);
 		setSelectedId(null);
-	}, [elements, textBoxes]);
+		
+
+		send({ type: "canvas-sync", elements: next.elements, roomId })
+	}, [elements, textBoxes,send,roomId]);
 
 	// Ctrl+Z / Ctrl+Y
 	useEffect(() => {
@@ -108,6 +114,11 @@ function CanvasBoard({ tool, roomId }: Prop) {
 					return [...prev, msg.element];
 				});
 			}
+
+
+			if (msg.type === "canvas-sync") {
+				setElements(msg.elements)
+			  }
 
 			if (msg.type === "update") {
 				setElements((prev) => {

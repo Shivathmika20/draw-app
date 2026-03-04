@@ -165,6 +165,7 @@ wss.on('connection', (ws: WebSocket, req) => {
       }
   
 
+
       if(message.type==='leave-room'){
         const roomId=message.roomId;
         const user = users.find(x => x.ws === ws);
@@ -355,6 +356,23 @@ wss.on('connection', (ws: WebSocket, req) => {
           type: 'text-erase',
           id: message.id,
           roomId: roomSlug
+        })
+      }
+      if (message.type === 'canvas-sync') {
+        const user = users.find(x => x.ws === ws)
+        if (!user) return
+        const roomSlug = message.roomId
+        if (!user.rooms.includes(roomSlug)) return
+      
+        // broadcast to everyone else
+        users.forEach(u => {
+          if (u.rooms.includes(roomSlug) && u.ws !== ws) {
+            u.ws.send(JSON.stringify({
+              type:     'canvas-sync',
+              elements: message.elements,
+              roomId:   roomSlug
+            }))
+          }
         })
       }
 

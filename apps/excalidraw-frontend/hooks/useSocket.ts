@@ -92,9 +92,15 @@ type TextEraseMessage = {
 	roomId: string
   }
 
-  type ActivityMessage = {
+type ActivityMessage = {
 	type: "activity"
 	message: string
+  }
+
+type CanvasSyncMessage = {
+	type: "canvas-sync"
+	elements: ExtendedDrawElement[]
+	roomId: string
   }
 
 export type SocketMessage =
@@ -113,7 +119,7 @@ export type SocketMessage =
     | TextUpdateMessage
     | TextEraseMessage
   	| ActivityMessage
-
+  	| CanvasSyncMessage
 
 export const useSocket = () => {
 	const socketRef = useRef<WebSocket | null>(null);
