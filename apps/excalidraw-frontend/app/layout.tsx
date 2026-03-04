@@ -32,7 +32,7 @@ export default function RootLayout({
       >
         <SocketProvider>
           {children}
-          <Toaster position="top-center" richColors />
+          <Toaster  position="bottom-center" duration={2000} richColors />
         </SocketProvider>
       </body>
     </html>

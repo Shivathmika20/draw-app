@@ -132,6 +132,7 @@ wss.on('connection', (ws: WebSocket, req) => {
         // Add user to room
         user.rooms.push(roomId.toString());
 
+
         broadcastToRoom(roomId,{
           type: "user-joined",
           roomId,
@@ -162,6 +163,7 @@ wss.on('connection', (ws: WebSocket, req) => {
         // add this in join-room handler  
         console.log('all users after join:', users.map(u => ({ id: u.userId, rooms: u.rooms })))
       }
+  
 
       if(message.type==='leave-room'){
         const roomId=message.roomId;
@@ -236,6 +238,8 @@ wss.on('connection', (ws: WebSocket, req) => {
           })
         
       }
+
+     
 
       if (message.type === 'draw') {
         console.log('element received:', message.element) 

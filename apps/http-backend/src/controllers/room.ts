@@ -64,3 +64,25 @@ export const getChats=async (req:Request,res:Response)=>{
 
 }
 
+export const getDrawings = async (req: Request, res: Response) => {
+   const { slug } = req.params;
+   
+   const room = await prisma.room.findUnique({
+     where: { slug },
+   });
+   
+   if (!room) {
+     return res.status(404).json({ message: "Room not found" });
+   }
+ 
+   const drawings = await prisma.drawing.findMany({
+     where: { roomId: room.id },
+     orderBy: { id: 'asc' },
+   });
+   if(!drawings){
+      return res.status(404).json({ message: "Chats not found" });
+    }
+ 
+   res.status(200).json({ drawings });
+ }
+

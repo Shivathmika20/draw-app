@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import { authenticate } from '../middleware';
-import { createRoom } from '../controllers/room';
+import { createRoom, getDrawings } from '../controllers/room';
 import { getRoom ,getChats} from '../controllers/room';
 
 
@@ -10,4 +10,4 @@ roomRouter.post('/',authenticate,createRoom);
 
 roomRouter.get('/:roomSlug',authenticate,getRoom);
 
-roomRouter.get('/chats/:slug',authenticate,getChats);
+roomRouter.get('/:slug/drawings',authenticate,getDrawings);

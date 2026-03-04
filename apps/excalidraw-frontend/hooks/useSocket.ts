@@ -145,8 +145,8 @@ export const useSocket = () => {
 		ws.onmessage = (event) => {
 			try {
 				const data = JSON.parse(event.data) as SocketMessage;
-				// console.log("raw ws message:", data.type);
-        		console.log("raw ws message:", data.type, "listeners count:", listenersRef.current.length)
+				console.log("raw ws message:", data.type);
+        		// console.log("raw ws message:", data.type, "listeners count:", listenersRef.current.length)
 				// ── Room events → useState (these are infrequent, no cascade risk) ──
 				if (
 					data.type === "room-users" ||
