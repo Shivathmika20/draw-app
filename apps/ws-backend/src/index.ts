@@ -35,7 +35,7 @@ async function canUserJoinRoom(userId: number, roomSlug: string) {
   if (!room) return null;
 
   const isAdmin = room.adminId === userId;
-  const isMember = room.members.some(m => m.id === userId);
+  const isMember = room.members.some((m: { id: number }) => m.id === userId);
 
   return { room, isAdmin, isMember };
 }
@@ -215,22 +215,6 @@ wss.on('connection', (ws: WebSocket, req) => {
           return;
         }
 
-        const room=await prisma.room.findUnique({
-          where: { slug: roomSlug },
-          select: { id: true },
-        })
-        if(!room){
-          ws.send(JSON.stringify({ type: 'error', message: 'Room not found' }));
-          return;
-        }
-
-        await prisma.chat.create({
-          data: {
-            message: chatMessage,
-            userId:Number(user.userId),
-            roomId:room.id
-          }
-        })
         // Broadcast message to all users in the room
         users.forEach(user=>{
             if(user.rooms.includes(roomSlug)){
