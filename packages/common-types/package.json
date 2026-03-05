@@ -2,13 +2,13 @@
   "name": "@repo/common-types",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/types.ts",
+  "main": "./dist/types.ts",
   "exports": {
-    "./types": "./src/types.ts",
-    "./roomtypes":"./src/roomtypes.ts",
-    "./tools":"./src/tools.ts",
-    "./canavs":"./src/canvastypes.ts",
-    "./wstype":"./src/wstypes.ts"
+    "./types": "./dist/types.ts",
+    "./roomtypes":"./dist/roomtypes.ts",
+    "./tools":"./dist/tools.ts",
+    "./canavs":"./dist/canvastypes.ts",
+    "./wstype":"./dist/wstypes.ts"
 
   },
   "scripts": {

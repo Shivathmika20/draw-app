@@ -10,13 +10,13 @@
   },
   "dependencies": {
     "@repo/db": "workspace:*",
+    "@repo/backend-auth": "workspace:*",
     "dotenv": "^17.2.3",
     "jsonwebtoken": "^9.0.3",
     "tsx": "^4.21.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@repo/backend-auth": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/ws": "^8.18.1"

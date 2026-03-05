@@ -2,7 +2,7 @@
   "name": "@repo/backend-auth",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main":  "./dist/config.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
@@ -12,7 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "exports": {
-    "./config": "./src/config.ts"
+    "./config": "./dist/config.ts"
   },
   "dependencies": {
     "@types/node": "^22.15.3"

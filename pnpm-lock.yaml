@@ -139,6 +139,9 @@ importers:
 
   apps/ws-backend:
     dependencies:
+      '@repo/backend-auth':
+        specifier: workspace:*
+        version: link:../../packages/backend-auth
       '@repo/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -155,9 +158,6 @@ importers:
         specifier: ^8.18.3
         version: 8.18.3
     devDependencies:
-      '@repo/backend-auth':
-        specifier: workspace:*
-        version: link:../../packages/backend-auth
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
