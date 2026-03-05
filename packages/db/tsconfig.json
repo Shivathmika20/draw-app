@@ -5,7 +5,9 @@
       "rootDir": "./src",
       "declaration": true,
       "noEmit": false,
-      "types": ["node"]
+      "types": ["node"],
+      "emitDeclarationOnly": false // ← override base
+     
     },
     "include": ["src/**/*"]
   }
