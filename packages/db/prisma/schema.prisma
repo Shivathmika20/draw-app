@@ -7,15 +7,7 @@ datasource db {
   provider = "postgresql"
 }
 
-model Chat {
-  id        Int      @id @default(autoincrement())
-  message   String
-  createdAt DateTime @default(now())
-  userId    Int
-  roomId    Int
-  Room      Room     @relation(fields: [roomId], references: [id])
-  User      User     @relation(fields: [userId], references: [id])
-}
+
 
 model Room {
   id        Int      @id @default(autoincrement())
@@ -23,7 +15,7 @@ model Room {
   createdAt DateTime @default(now())
   adminId   Int
   admin     User     @relation("AdminRooms", fields: [adminId], references: [id])
-  Chat      Chat[]
+
   members   User[]   @relation("RoomMembers")
 
 
@@ -37,7 +29,7 @@ model User {
   name      String
   createdAt DateTime @default(now())
   photo     String?
-  Chat      Chat[]
+ 
   rooms      Room[]   @relation("AdminRooms")
   memberRooms     Room[]   @relation("RoomMembers")
 
