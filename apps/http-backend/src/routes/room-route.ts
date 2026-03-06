@@ -1,7 +1,7 @@
 import {Router} from 'express';
 import { authenticate } from '../middleware';
 import { createRoom, getDrawings } from '../controllers/room';
-import { getRoom ,getChats} from '../controllers/room';
+import { getRoom } from '../controllers/room';
 
 
 export const roomRouter:Router = Router();

@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "commonjs",
   "exports": {
+    ".": "./dist/index.js",
     "./config": "./dist/config.ts"
   },
   "dependencies": {

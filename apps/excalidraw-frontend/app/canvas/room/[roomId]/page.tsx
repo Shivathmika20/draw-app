@@ -1,7 +1,7 @@
 import ToolRoom from "../../../../components/RoomHeader";
 import { GetRoomAction } from "@/actions/room-server-action";
 import { notFound } from "next/navigation";
-import { Room } from "@repo/common-types/roomtypes";
+import { Room } from "@repo/common-types";
 
 const Page = async ({ params }: { params: { roomId: string } }) => {
 	const { roomId } = await params;

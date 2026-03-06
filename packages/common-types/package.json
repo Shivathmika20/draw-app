@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "./dist/types.ts",
+  "types": "dist/index.d.ts",
   "exports": {
+    ".": "./dist/index.js",
     "./types": "./dist/types.ts",
     "./roomtypes":"./dist/roomtypes.ts",
     "./tools":"./dist/tools.ts",
-    "./canavs":"./dist/canvastypes.ts",
+    "./canvas":"./dist/canvastypes.ts",
     "./wstype":"./dist/wstypes.ts"
 
   },
