@@ -3,9 +3,11 @@ import { SigninSchema, SignupSchema } from "@repo/common-types";
 import { z } from "zod";
 import { cookies } from "next/headers";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_HTTP_BACKEND
+
 export const SignupAction = async (values: z.infer<typeof SignupSchema>) => {
 	try {
-		const res = await fetch("http://localhost:3001/auth/signup", {
+		const res = await fetch(`${BACKEND_URL}/auth/signup`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -26,7 +28,7 @@ export const SignupAction = async (values: z.infer<typeof SignupSchema>) => {
 export const SigninAction = async (values: z.infer<typeof SigninSchema>) => {
 	console.log("SERVER ACTION CALLED");
 	try {
-		const res = await fetch("http://localhost:3001/auth/signin", {
+		const res = await fetch(`${BACKEND_URL}/auth/signin`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

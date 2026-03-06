@@ -4,6 +4,8 @@ import { z } from "zod";
 import { cookies } from "next/headers";
 import { getToken } from "./get-token-action";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_HTTP_BACKEND
+
 export const CreateRoomAction = async (
 	values: z.infer<typeof CreateRoomSchema>,
 ) => {
@@ -11,7 +13,7 @@ export const CreateRoomAction = async (
 		const cookieStore = await cookies();
 		const token = cookieStore.get("token")?.value;
 
-		const res = await fetch("http://localhost:3001/room", {
+		const res = await fetch(`${BACKEND_URL}/room`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -39,7 +41,7 @@ export const GetRoomAction = async ({ roomId }: { roomId: string }) => {
 		const cookieStore = await cookies();
 		const token = cookieStore.get("token")?.value;
 
-		const res = await fetch(`http://localhost:3001/room/${roomSlug}`, {
+		const res = await fetch(`${BACKEND_URL}/room/${roomSlug}`, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",

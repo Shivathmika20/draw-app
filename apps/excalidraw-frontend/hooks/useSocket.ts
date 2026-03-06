@@ -121,6 +121,8 @@ export type SocketMessage =
   	| ActivityMessage
   	| CanvasSyncMessage
 
+
+	const WS_URL=process.env.NEXT_PUBLIC_WS_BACKEND
 export const useSocket = () => {
 	const socketRef = useRef<WebSocket | null>(null);
 	const [isConnected, setIsConnected] = useState(false);
@@ -140,7 +142,7 @@ export const useSocket = () => {
 	const connect = (token: string) => {
 		if (socketRef.current) return; // already connected
 
-		const ws = new WebSocket(`ws://localhost:8080?token=${token}`);
+		const ws = new WebSocket(`${WS_URL}?token=${token}`);
 		socketRef.current = ws;
 
 		ws.onopen = () => {
