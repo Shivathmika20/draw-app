@@ -48,7 +48,7 @@ function broadcastToRoom(roomId: string, payload: any) {
   })
 }
 
-wss.on('connection', (ws: WebSocket, req) => {
+wss.on('connection', (ws: WebSocket, req: any) => {
     console.log('Client connected');
     const url=req.url || ''; //ws://localhost:8080?token='12232'
     if(!url){
@@ -73,7 +73,7 @@ wss.on('connection', (ws: WebSocket, req) => {
     
     
 
-    ws.on('message',async (data)=>{
+    ws.on('message',async (data: any)=>{
       console.log('message received',data.toString());
       try {
         const message=JSON.parse(data.toString())
@@ -373,7 +373,7 @@ wss.on('connection', (ws: WebSocket, req) => {
       
     })
     
-    ws.on('error', (error) => {
+    ws.on('error', (error: any) => {
       console.error('WebSocket error:', error);
     });
     

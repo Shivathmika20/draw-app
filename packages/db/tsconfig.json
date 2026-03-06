@@ -4,6 +4,7 @@
       "outDir": "./dist",
       "rootDir": "./src",
       "declaration": true,
+      "declarationMap": true,
       "noEmit": false,
       "types": ["node"],
       "emitDeclarationOnly": false // ← override base
