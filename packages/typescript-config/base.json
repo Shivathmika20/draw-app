@@ -14,7 +14,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "ES2022",
-    "emitDeclarationOnly": true
+    "target": "ES2022"
+    
   }
 }
