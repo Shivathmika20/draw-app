@@ -1,8 +1,5 @@
 import { Authform } from "@/components/Authform";
-import { SignupAction } from "@/actions/auth-server-action";
-import { redirect } from "next/navigation";
-import { SignupSchema } from "@repo/common-types";
-import { z } from "zod";
+
 
 export default function SignupPage() {
 	return (
@@ -29,13 +26,6 @@ export default function SignupPage() {
 					type: "text",
 					placeholder: "Enter your name",
 					required: true,
-				},
-				{
-					name: "photo",
-					label: "Photo",
-					type: "text",
-					placeholder: "upload your photo",
-					required: false,
 				},
 			]}
 			submitLabel="Signup"
