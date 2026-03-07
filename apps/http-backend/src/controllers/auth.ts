@@ -27,7 +27,6 @@ export const signup = async (req: Request, res: Response) => {
 				username: parsedData.data.username,
 				password: hashedPassword,
 				name: parsedData.data.name,
-				photo: parsedData.data.photo,
 			},
 		});
 		return res
